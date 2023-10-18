@@ -2,12 +2,12 @@ Name:      simengine-dashboard
 Version:   3.42
 Release:   1%{?dist}
 Summary:   SimEngine - Dashboard
-URL:       https://github.com/Seneca-CDOT/simengine
+URL:       https://github.com/Alteeve/simengine
 License:   GPLv3+
 
 %global gittag %{version}
 
-Source0:   https://github.com/Seneca-CDOT/simengine/archive/%{gittag}/simengine-%{version}.tar.gz
+Source0:   https://github.com/Alteeve/simengine/archive/%{gittag}/simengine-%{version}.tar.gz
 
 BuildRequires: nodejs-devel >= 12
 

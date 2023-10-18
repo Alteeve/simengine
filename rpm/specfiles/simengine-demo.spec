@@ -8,8 +8,8 @@ BuildArch:	noarch
 %global selected_libdir /usr/lib64
 
 License:        GPLv3+
-URL:            https://github.com/Seneca-CDOT/simengine
-Source0:        https://github.com/Seneca-CDOT/simengine/archive/%{gittag}/simengine-%{version}.tar.gz
+URL:            https://github.com/Alteeve/simengine
+Source0:        https://github.com/Alteeve/simengine/archive/%{gittag}/simengine-%{version}.tar.gz
   
 Requires:       libvirt-client
 Requires:	zenity

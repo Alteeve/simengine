@@ -5,7 +5,7 @@ Summary:        SimEngine - Repo
 BuildArch:	noarch
 
 License:        GPLv3+
-URL:            https://github.com/Seneca-CDOT/simengine
+URL:            https://github.com/Alteeve/simengine
 
 Source0: simengine.repo
 

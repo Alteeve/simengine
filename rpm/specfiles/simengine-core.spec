@@ -2,13 +2,13 @@ Name:      simengine-core
 Version:   3.42
 Release:   1%{?dist}
 Summary:   SimEngine - Core
-URL:       https://github.com/Seneca-CDOT/simengine
+URL:       https://github.com/Alteeve/simengine
 License:   GPLv3+
 
 %global gittag %{version}
 %global selected_libdir /usr/lib64
 
-Source0: https://github.com/Seneca-CDOT/simengine/archive/%{gittag}/simengine-%{version}.tar.gz  
+Source0: https://github.com/Alteeve/simengine/archive/%{gittag}/simengine-%{version}.tar.gz  
 
 BuildRequires: OpenIPMI-devel, gcc
 
