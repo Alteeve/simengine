@@ -4,7 +4,7 @@
 # run the buildall script, and
 # install the generated RPMs
 
-REMOTE="https://github.com/Seneca-CDOT/simengine.git"
+REMOTE="https://github.com/Alteeve/simengine.git"
 SE_DIR="${HOME}/simengine"
 RPMS_DIR="${HOME}/rpmbuild/RPMS"
 

@@ -67,12 +67,12 @@ UPS also supports minimum battery level required (before UPS can power up its ou
 
 ### Vendor Pre-Set
 
-The simengine defaults its SNMP interface settings to APC hardware (outlined here [ups](https://github.com/Seneca-CDOT/simengine/blob/master/enginecore/enginecore/model/presets/apc_ups.json)). Custom vendor presets can be passed to the `simengine-cli` system modelling tool with the `--snmp-preset=/path/to/my_specs.json` option.
+The simengine defaults its SNMP interface settings to APC hardware (outlined here [ups](https://github.com/Alteeve/simengine/blob/master/enginecore/enginecore/model/presets/apc_ups.json)). Custom vendor presets can be passed to the `simengine-cli` system modelling tool with the `--snmp-preset=/path/to/my_specs.json` option.
 
 You can find APC examples of .json config files in simengine repo:
 
-- [ups](https://github.com/Seneca-CDOT/simengine/blob/master/enginecore/enginecore/model/presets/apc_ups.json)
-- [pdu](https://github.com/Seneca-CDOT/simengine/blob/master/enginecore/enginecore/model/presets/apc_pdu.json)
+- [ups](https://github.com/Alteeve/simengine/blob/master/enginecore/enginecore/model/presets/apc_ups.json)
+- [pdu](https://github.com/Alteeve/simengine/blob/master/enginecore/enginecore/model/presets/apc_pdu.json)
 
 **General Configurations (snmp-preset file description)**
 
@@ -159,7 +159,7 @@ Will require the following .xml configurations:
     </qemu:commandline>
 
 Storage emulation features require `storcli64` executable to be uploaded to the managed vm bin directory.
-The binary can be found in simengine repo: [link](https://github.com/Seneca-CDOT/simengine/blob/master/storage-emulation-tests/guest/storcli64)
+The binary can be found in simengine repo: [link](https://github.com/Alteeve/simengine/blob/master/storage-emulation-tests/guest/storcli64)
 
 Here is a breakdown of `server-bmc` command line parameters and some corresponding .xml configurations:
 
@@ -180,9 +180,9 @@ Here is a breakdown of `server-bmc` command line parameters and some correspondi
 
 **Sensor Model**
 
-SimEngine defaults its IPMI/BMC sensor definitions to the following [model](https://github.com/Seneca-CDOT/simengine/blob/master/enginecore/enginecore/model/presets/sensors.json). Custom configurations can be passed to the `cli` system modelling tool with the `--sensor-def=/path/to/my_specs.json` option.
+SimEngine defaults its IPMI/BMC sensor definitions to the following [model](https://github.com/Alteeve/simengine/blob/master/enginecore/enginecore/model/presets/sensors.json). Custom configurations can be passed to the `cli` system modelling tool with the `--sensor-def=/path/to/my_specs.json` option.
 
-Engine supports a limited number of sensor [types](https://github.com/Seneca-CDOT/simengine/blob/master/enginecore/enginecore/model/supported_sensors.py) and each sensor definition must provide `defaultValue`, `offValue` and `name` as well as `address` if `addressSpace` is not provided. You can also specify any number of thresholds (or none).
+Engine supports a limited number of sensor [types](https://github.com/Alteeve/simengine/blob/master/enginecore/enginecore/model/supported_sensors.py) and each sensor definition must provide `defaultValue`, `offValue` and `name` as well as `address` if `addressSpace` is not provided. You can also specify any number of thresholds (or none).
 
     "caseFan": {
         "group": "fan",
@@ -206,7 +206,7 @@ Engine supports a limited number of sensor [types](https://github.com/Seneca-CDO
 
 **Storage Model**
 
-SimEngine uses the following storage topology: [storage.json](https://github.com/Seneca-CDOT/simengine/blob/master/enginecore/enginecore/model/presets/storage.json). Custom configurations can be passed to the `cli` system modelling tool with the `--storage-def=/path/to/my_specs.json` option. You can specify any number of controllers and each controller can include definitions of cache vault (`CacheVault`), virtual and physical drives (`VD` & `PD`).
+SimEngine uses the following storage topology: [storage.json](https://github.com/Alteeve/simengine/blob/master/enginecore/enginecore/model/presets/storage.json). Custom configurations can be passed to the `cli` system modelling tool with the `--storage-def=/path/to/my_specs.json` option. You can specify any number of controllers and each controller can include definitions of cache vault (`CacheVault`), virtual and physical drives (`VD` & `PD`).
 
     {
         // ..storcli64 details

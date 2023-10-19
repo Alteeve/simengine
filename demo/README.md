@@ -1,7 +1,7 @@
 # Simengine Demo
 
 
-For anyone looking to demo or test an example of [Simengine](https://github.com/Seneca-CDOT/simengine) running with the [Alteeve Anvil model](https://simengine.readthedocs.io/en/latest/Anvil%20Model/).
+For anyone looking to demo or test an example of [Simengine](https://github.com/Alteeve/simengine) running with the [Alteeve Anvil model](https://simengine.readthedocs.io/en/latest/Anvil%20Model/).
 
 A bash script and desktop file providing CLI and GUI options for downloading and setting up a virtual environment that is pre-configured for simengine, running an example of the Anvil model. The script also provides access to the simengine dashboard for managing the model through GUI, as well as the Anvil! dashboard.
 

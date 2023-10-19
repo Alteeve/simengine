@@ -117,18 +117,18 @@ Change the top-level tag to `<domain type='kvm' xmlns:qemu='http://libvirt.org/s
 
 You will need to upload `storcli64` binary to the target vms (`an-a01n01` and `an-a01n02`) bin folder `/usr/bin` and make them executable by running `chmod +x /usr/bin/storcli64`.
 
-The binary can be found in simengine repo: [link](https://github.com/Seneca-CDOT/simengine/blob/master/storage-emulation-tests/guest/storcli64)
+The binary can be found in simengine repo: [link](https://github.com/Alteeve/simengine/blob/master/storage-emulation-tests/guest/storcli64)
 
 
 ## Network Configuration
 
 **Virtual Network**
 
-You will need to define 4 virtual networks (`sn1_bridge1`, `sn2_bridge1` and `bcn1_bridge1`, `bcn2_bridge1`) using [net-define script](https://github.com/Seneca-CDOT/simengine/blob/master/enginecore/script/bridges) and configure virtual `NIC`s for the VMs;
+You will need to define 4 virtual networks (`sn1_bridge1`, `sn2_bridge1` and `bcn1_bridge1`, `bcn2_bridge1`) using [net-define script](https://github.com/Alteeve/simengine/blob/master/enginecore/script/bridges) and configure virtual `NIC`s for the VMs;
 
 ***Using Virsh .XML***
 
-One way to connect guests to the newly-defined interfaces is to copy `<interface>...</interface>` tags in `an-*.xml` vm config dump files located in [data folder](https://github.com/Seneca-CDOT/simengine/blob/master/data/virsh) and paste in xml configuration by running `virsh edit` for all 4 vms;
+One way to connect guests to the newly-defined interfaces is to copy `<interface>...</interface>` tags in `an-*.xml` vm config dump files located in [data folder](https://github.com/Alteeve/simengine/blob/master/data/virsh) and paste in xml configuration by running `virsh edit` for all 4 vms;
 
 ***Virt-Manager Tool (Alternative to Using Virsh .XML)***
 

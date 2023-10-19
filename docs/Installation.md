@@ -4,7 +4,7 @@ To install from RPMs:
 
 1. Add the neo4j repository as documented at [http://yum.neo4j.org/stable/](http://yum.neo4j.org/stable/)
 
-2. Build local RPMs from specs by running [buildall script](https://github.com/Seneca-CDOT/simengine/tree/master/rpm/specfiles)
+2. Build local RPMs from specs by running [buildall script](https://github.com/Alteeve/simengine/tree/master/rpm/specfiles)
 
 3. Install the local simengine RPMs from the local repository:
    sudo dnf install \*.rpm
@@ -34,7 +34,7 @@ This will bump the product tag and adjust the Version: tags in the spec files, c
 
 ## Licenses
 
-SimEngine is licensed under [GPL V3](https://github.com/Seneca-CDOT/simengine/blob/master/LICENSE.txt);
+SimEngine is licensed under [GPL V3](https://github.com/Alteeve/simengine/blob/master/LICENSE.txt);
 
 **Dependencies**
 
@@ -65,7 +65,7 @@ Python PIP Dependencies:
 
 Dashboard:
 
-A list of frontend npm packages and their corresponding licenses can be found [here](https://github.com/Seneca-CDOT/simengine/blob/master/docs/.misc/frontend-licenses.csv).
+A list of frontend npm packages and their corresponding licenses can be found [here](https://github.com/Alteeve/simengine/blob/master/docs/.misc/frontend-licenses.csv).
 
 ## Python API
 

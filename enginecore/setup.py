@@ -25,8 +25,8 @@ setup(
     ],
     url="https://simengine.readthedocs.io/en/latest/",
     project_urls={
-        "Bug Tracker": "https://github.com/Seneca-CDOT/simengine/issues",
+        "Bug Tracker": "https://github.com/Alteeve/simengine/issues",
         "Documentation": "https://simengine.readthedocs.io/en/latest/",
-        "Source Code": "https://github.com/Seneca-CDOT/simengine",
+        "Source Code": "https://github.com/Alteeve/simengine",
     },
 )
