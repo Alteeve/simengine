@@ -1,0 +1,103 @@
+commit b85a3bdcf0d1a00ae09baaf20d368ef3f5a10d7c
+Author: Fabio M. Di Nitto <fabbione@fabbione.net>
+Date:   Mon Jan 8 15:58:32 2024 +0100
+
+    python3.9: use is_alive vs isAlive
+    
+    https://github.com/fkie/multimaster_fkie/issues/149
+    
+    Signed-off-by: Fabio M. Di Nitto <fabbione@fabbione.net>
+
+diff --git a/enginecore/enginecore/state/hardware/room.py b/enginecore/enginecore/state/hardware/room.py
+index 8e01921..b378b3e 100644
+--- a/enginecore/enginecore/state/hardware/room.py
++++ b/enginecore/enginecore/state/hardware/room.py
+@@ -174,7 +174,7 @@ class ServerRoom(Component):
+     def _init_voltage_thread(self):
+         """Initialize voltage fluctuations threading"""
+ 
+-        if self._voltage_fluct_t and self._voltage_fluct_t.isAlive():
++        if self._voltage_fluct_t and self._voltage_fluct_t.is_alive():
+             logger.warning("Voltage thread is already running!")
+             return
+ 
+@@ -214,17 +214,17 @@ class ServerRoom(Component):
+         horizontal_line = "-" * 20
+ 
+         th_warming_status = (
+-            "up" if self._temp_warming_t.isAlive() else "down",
++            "up" if self._temp_warming_t.is_alive() else "down",
+             "enabled" if not wall_power_status else "disabled",
+         )
+ 
+         th_cooling_status = (
+-            "up" if self._temp_cooling_t.isAlive() else "down",
++            "up" if self._temp_cooling_t.is_alive() else "down",
+             "enabled" if wall_power_status else "disabled",
+         )
+ 
+         th_voltage_status = (
+-            "up" if self._voltage_fluct_t.isAlive() else "down",
++            "up" if self._voltage_fluct_t.is_alive() else "down",
+             "enabled" if wall_power_status and volt_props["enabled"] else "disabled",
+         )
+ 
+diff --git a/enginecore/enginecore/state/hardware/server_asset.py b/enginecore/enginecore/state/hardware/server_asset.py
+index dd42a4c..b350263 100644
+--- a/enginecore/enginecore/state/hardware/server_asset.py
++++ b/enginecore/enginecore/state/hardware/server_asset.py
+@@ -454,7 +454,7 @@ class ServerWithBMC(Server):
+         self._sensor_repo.stop()
+         self._stop_event.set()
+ 
+-        if self._vm_monitor_t is not None and self._vm_monitor_t.isAlive():
++        if self._vm_monitor_t is not None and self._vm_monitor_t.is_alive():
+             self._vm_monitor_t.join()
+ 
+         super().stop(code)
+diff --git a/enginecore/enginecore/state/hardware/ups_asset.py b/enginecore/enginecore/state/hardware/ups_asset.py
+index 5161ded..7400331 100644
+--- a/enginecore/enginecore/state/hardware/ups_asset.py
++++ b/enginecore/enginecore/state/hardware/ups_asset.py
+@@ -225,7 +225,7 @@ class UPS(Asset, SNMPSim):
+     ):
+         """Start a thread that will decrease battery level"""
+ 
+-        if self._battery_drain_t and self._battery_drain_t.isAlive():
++        if self._battery_drain_t and self._battery_drain_t.is_alive():
+             logger.warning("Battery drain is already running!")
+             self.state.update_transfer_reason(t_reason)
+             self._increase_transfer_severity()
+@@ -253,7 +253,7 @@ class UPS(Asset, SNMPSim):
+     def _launch_battery_charge(self, power_up_on_charge=False):
+         """Start a thread that will charge battery level"""
+ 
+-        if self._battery_charge_t and self._battery_charge_t.isAlive():
++        if self._battery_charge_t and self._battery_charge_t.is_alive():
+             logger.warning("Battery is already charging!")
+             return
+ 
+@@ -425,12 +425,12 @@ class UPS(Asset, SNMPSim):
+     @property
+     def draining_battery(self):
+         """Returns true if UPS battery is being drained"""
+-        return self._battery_drain_t is not None and self._battery_drain_t.isAlive()
++        return self._battery_drain_t is not None and self._battery_drain_t.is_alive()
+ 
+     @property
+     def charging_battery(self):
+         """Returns true if UPS battery is getting re-charged"""
+-        return self._battery_charge_t is not None and self._battery_charge_t.isAlive()
++        return self._battery_charge_t is not None and self._battery_charge_t.is_alive()
+ 
+     @property
+     def charge_speed_factor(self):
+@@ -475,7 +475,7 @@ class UPS(Asset, SNMPSim):
+         self._stop_event.set()
+ 
+         for thread in [self._battery_charge_t, self._battery_drain_t]:
+-            if thread is not None and thread.isAlive():
++            if thread is not None and thread.is_alive():
+                 thread.join()
+ 
+         super().stop(code)

@@ -1,0 +1,39 @@
+commit 6b6c1167f2753d1289ee5bdfc4910f72a5012c7c
+Author: tmoss404 <tmoss404@gmail.com>
+Date:   Mon Jan 23 12:38:55 2023 -0500
+
+    fixed code blocks
+
+diff --git a/demo/README.md b/demo/README.md
+index 9f086e3..0a62cb8 100644
+--- a/demo/README.md
++++ b/demo/README.md
+@@ -2,17 +2,16 @@
+ 
+ Resources for demoing the simengine / anvil dashboards
+ 
+-
+ ## Aquiring and running simengine-demo script
+ 
+ ### Installing simengine repo file:
+ ```bash
+-sudo dnf install http://england.cdot.systems/simengine/simengine-repo-3.42-1.fc35.noarch.rpm and install the package
++sudo dnf install http://england.cdot.systems/simengine/simengine-repo-3.42-1.fc35.noarch.rpm
+ ```
+ 
+ ### Installing simengine-demo script and desktop file:
+ ```bash
+-sudo dnf install simengine-demo and install the package
++sudo dnf install simengine-demo
+ ```
+ 
+ ### Downloading and unpacking simengine vm:
+@@ -53,7 +52,7 @@ simengine-demo
+ 
+ desktop file:
+ ```
+-simply opening the desktop file normally
++open the desktop file normally
+ ```
+ 
+ Upon success you should have two browser tabs opened to the simengine and anvil dashboards, all done!

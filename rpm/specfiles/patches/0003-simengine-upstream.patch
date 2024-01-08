@@ -1,0 +1,54 @@
+commit f25639ceaf2922f3a11c11d6ebcef4739c9074d3
+Author: tmoss404 <tmoss404@gmail.com>
+Date:   Mon Jan 23 11:07:05 2023 -0500
+
+    Simengine repo file and spec file for building repo rpm
+
+diff --git a/rpm/specfiles/repo/simengine-repo.spec b/rpm/specfiles/repo/simengine-repo.spec
+new file mode 100644
+index 0000000..4595f36
+--- /dev/null
++++ b/rpm/specfiles/repo/simengine-repo.spec
+@@ -0,0 +1,27 @@
++Name:           simengine-repo
++Version:        3.42
++Release:        1%{?dist}
++Summary:        SimEngine - Repo
++BuildArch:	noarch
++
++License:        GPLv3+
++URL:            https://github.com/Seneca-CDOT/simengine
++
++Source0: simengine.repo
++
++%description
++Package to install simengine repo file 
++
++%install
++install -d %{buildroot}/%{_sysconfdir}/yum.repos.d
++install -p %{SOURCE0} %{buildroot}/%{_sysconfdir}/yum.repos.d/simengine.repo
++
++%files
++%{_sysconfdir}/yum.repos.d/simengine.repo
++
++
++%changelog
++
++* Sat Jan 21 2023 Tanner Moss <tmoss404@gmail.com>
++- Initial packaging
++
+diff --git a/rpm/specfiles/repo/simengine.repo b/rpm/specfiles/repo/simengine.repo
+new file mode 100644
+index 0000000..073aaa9
+--- /dev/null
++++ b/rpm/specfiles/repo/simengine.repo
+@@ -0,0 +1,9 @@
++[simengine]
++name=Simengine Repo
++baseurl=http://england.cdot.systems/simengine
++enabled=1
++metadate_expire=1d
++repo_gpgcheck=0
++type=rpm
++gpgcheck=0
++skip_if_unavailable=False

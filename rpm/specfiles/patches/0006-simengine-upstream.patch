@@ -1,0 +1,1422 @@
+commit a85fcb65b5471e98faa61e935f3fa8d1145d4af9
+Author: tmoss404 <75254523+tmoss404@users.noreply.github.com>
+Date:   Fri Feb 24 11:02:06 2023 -0500
+
+    Many minor adjustments, query emu output more in line with real examples (#178)
+    
+    * Many minor adjustments, query emu output more in line with real examples
+    
+    * style(enginecore): python linting
+
+diff --git a/enginecore/enginecore/cli/actions.py b/enginecore/enginecore/cli/actions.py
+index 4e2c266..1b78b9e 100644
+--- a/enginecore/enginecore/cli/actions.py
++++ b/enginecore/enginecore/cli/actions.py
+@@ -108,7 +108,6 @@ def get_action_slice(start, end):
+     try:
+         return slice(int(start), int(end))
+     except (ValueError, TypeError):
+-
+         # attemp to parse dates if one/both of the range options are non digits
+         all_actions = StateClient.list_actions(slice(None, None))
+ 
+diff --git a/enginecore/enginecore/cli/configure_state.py b/enginecore/enginecore/cli/configure_state.py
+index 4c5bd83..0b5bfef 100644
+--- a/enginecore/enginecore/cli/configure_state.py
++++ b/enginecore/enginecore/cli/configure_state.py
+@@ -148,7 +148,6 @@ def handle_configure_randomizer(args, conf_rand_arguments):
+         server_manager = get_server_state_manager(args["asset_key"])
+         print("Server:[{0.key}] random arguments:".format(server_manager))
+         for rand_opt in conf_rand_arguments:
+-
+             s_prop = IBMCServerStateManager.StorageRandProps[rand_opt.replace("-", "_")]
+             opt_prop = server_manager.get_storage_radnomizer_prop(s_prop)
+             print(
+diff --git a/enginecore/enginecore/cli/status.py b/enginecore/enginecore/cli/status.py
+index ee6d983..36cc2dc 100644
+--- a/enginecore/enginecore/cli/status.py
++++ b/enginecore/enginecore/cli/status.py
+@@ -116,7 +116,6 @@ def get_status(**kwargs):
+ 
+     #### one asset ####
+     if kwargs["asset_key"] and kwargs["load"]:
+-
+         state_manager = IStateManager.get_state_manager_by_key(kwargs["asset_key"])
+ 
+         if kwargs["value_only"]:
+diff --git a/enginecore/enginecore/model/graph_reference.py b/enginecore/enginecore/model/graph_reference.py
+index 713c1c3..41b5731 100644
+--- a/enginecore/enginecore/model/graph_reference.py
++++ b/enginecore/enginecore/model/graph_reference.py
+@@ -252,7 +252,6 @@ class GraphReference:
+ 
+         assets = {}
+         for record in results:
+-
+             asset = dict(record["asset"])
+ 
+             ## Set asset parent(s)
+diff --git a/enginecore/enginecore/model/presets/storage.json b/enginecore/enginecore/model/presets/storage.json
+index c32b2d8..4ea6cf2 100644
+--- a/enginecore/enginecore/model/presets/storage.json
++++ b/enginecore/enginecore/model/presets/storage.json
+@@ -1,5 +1,5 @@
+ {
+-    "CLIVersion": " 007.0606.0000.0000 Mar 20, 2018",
++    "CLIVersion": "007.0606.0000.0000 Mar 20, 2018",
+     "operatingSystem": "Linux 2.6.32-754.6.3.el6.x86_64",
+     "controllers": [
+         {
+diff --git a/enginecore/enginecore/model/system_modeler.py b/enginecore/enginecore/model/system_modeler.py
+index d9bd813..0cac2bd 100644
+--- a/enginecore/enginecore/model/system_modeler.py
++++ b/enginecore/enginecore/model/system_modeler.py
+@@ -48,7 +48,6 @@ def _add_psu(key, psu_index, attr):
+     """
+ 
+     with GRAPH_REF.get_session() as session:
+-
+         query = []
+         # find the server
+         query.append("MATCH (asset:Asset {{ key: {} }})".format(key))
+@@ -80,7 +79,6 @@ def configure_asset(key, attr):
+         del attr["asset_key"]
+ 
+     with GRAPH_REF.get_session() as session:
+-
+         set_statement = qh.get_set_stm(attr)
+         query = "MATCH (asset:Asset {{ key: {key} }}) SET {set_stm}".format(
+             key=key, set_stm=set_statement
+@@ -117,7 +115,6 @@ def link_assets(source_key, dest_key):
+     """
+ 
+     with GRAPH_REF.get_session() as session:
+-
+         # Validate that the asset does not power already existing device
+         result = session.run(
+             """
+@@ -224,7 +221,6 @@ def _add_sensors(asset_key, preset_file):
+         data = json.load(preset_handler)
+ 
+         for sensor_type, sensor_specs in data.items():
+-
+             if sensor_type not in SUPPORTED_SENSORS:
+                 continue
+ 
+@@ -241,7 +237,6 @@ def _add_sensors(asset_key, preset_file):
+                 )
+ 
+             for idx, sensor in enumerate(sensor_specs["sensorDefinitions"]):
+-
+                 sensor_node = "{}{}".format(sensor_type, idx)
+ 
+                 if "address" in sensor and sensor["address"]:
+@@ -327,7 +322,6 @@ def _add_storage(asset_key, preset_file, storage_state_file):
+         )
+ 
+         for idx, controller in enumerate(storage_data["controllers"]):
+-
+             s_attr = [
+                 "controllerNum",
+                 "model",
+@@ -349,7 +343,7 @@ def _add_storage(asset_key, preset_file, storage_state_file):
+             default_ctr_prop = {
+                 "memoryCorrectable_errors": 0,
+                 "memoryUncorrectable_errors": 0,
+-                "alarmState": "off",
++                "alarmState": "OFF",
+                 "controllerNum": idx,
+             }
+             props_stm = qh.get_props_stm(
+@@ -405,7 +399,6 @@ def _add_storage(asset_key, preset_file, storage_state_file):
+ 
+             # Add physical drives
+             for pidx, phys_drive in enumerate(controller["PD"]):
+-
+                 pd_node = "pd" + str(phys_drive["DID"])
+ 
+                 # define supported attributes
+@@ -485,7 +478,6 @@ def _add_storage(asset_key, preset_file, storage_state_file):
+ 
+                 # connect PDs & VDs
+                 for pidx in virt_drive["DID"]:
+-
+                     query.append(
+                         "CREATE ({})<-[:BELONGS_TO_VIRTUAL_SPACE]-(pd{})".format(
+                             vd_node, pidx
+@@ -514,7 +506,6 @@ def create_server(key, attr, server_variation=ServerVariations.Server):
+         conn.close()
+ 
+     with GRAPH_REF.get_session() as session:
+-
+         query = []  # cypher query
+ 
+         attr["name"] = (
+@@ -540,7 +531,6 @@ def create_server(key, attr, server_variation=ServerVariations.Server):
+ 
+         # set BMC-server specific attributes if type is bmc
+         if server_variation == ServerVariations.ServerWithBMC:
+-
+             bmc_attr = {**IPMI_LAN_DEFAULTS, **attr}  # merge
+ 
+             set_stm = qh.get_set_stm(
+@@ -551,7 +541,6 @@ def create_server(key, attr, server_variation=ServerVariations.Server):
+         session.run("\n".join(query))
+ 
+         if server_variation == ServerVariations.ServerWithBMC:
+-
+             # if preset is provided -> use the user-defined file
+             f_loc = os.path.dirname(__file__)
+             s_def_file = (
+@@ -602,7 +591,6 @@ def create_ups(
+     )
+ 
+     with open(preset_file) as preset_handler, GRAPH_REF.get_session() as session:
+-
+         query = []
+         data = json.load(preset_handler)
+ 
+@@ -679,7 +667,6 @@ def create_ups(
+ 
+         # Set output outlets
+         for i in range(data["numOutlets"]):
+-
+             props = {
+                 "name": "out" + str(i + 1),
+                 "type": "outlet",
+@@ -708,7 +695,6 @@ def create_pdu(
+         else preset_file
+     )
+     with open(preset_file) as preset_handler, GRAPH_REF.get_session() as session:
+-
+         query = []
+         data = json.load(preset_handler)
+         outlet_count = data["OIDs"]["OutletCount"]["defaultValue"]
+@@ -756,17 +742,14 @@ def create_pdu(
+ 
+         # Outlet-specific OIDs
+         for oid_key, oid_props in data["outletOIDs"].items():
+-
+             # For outlet state, Outlet asset will need to be created
+             if oid_key == "OutletState":
+-
+                 oid_desc = dict((y, x) for x, y in oid_props["oidDesc"].items())
+ 
+                 desc_stm = qh.get_oid_desc_stm(oid_desc)
+                 query.append("CREATE (oidDesc:OIDDesc {{ {} }})".format(desc_stm))
+ 
+                 for j in range(outlet_count):
+-
+                     out_key = int("{}{}".format(key, str(j + 1)))
+                     props_stm = qh.get_props_stm(
+                         {"key": out_key, "name": "out" + str(j + 1), "type": "outlet"}
+@@ -787,7 +770,6 @@ def create_pdu(
+ 
+                     # create OID associated with outlet & pdu
+                     for oid_n, oid in enumerate(oid_props["OID"]):
+-
+                         out_key = int("{}{}".format(key, str(j + 1)))
+                         oid = oid + "." + str(j + 1)
+                         oid_node_name = "{oid_name}{outlet_num}{oid_num}".format(
+@@ -950,7 +932,6 @@ def _set_thermal_target(attr, query):
+     rel_query.append("RETURN ex_rel")
+ 
+     with GRAPH_REF.get_session() as session:
+-
+         result = session.run("\n".join(query + rel_query))
+         rel_exists = result.single()
+ 
+diff --git a/enginecore/enginecore/state/agent/ipmi_agent.py b/enginecore/enginecore/state/agent/ipmi_agent.py
+index 3865c1b..8a86b6a 100644
+--- a/enginecore/enginecore/state/agent/ipmi_agent.py
++++ b/enginecore/enginecore/state/agent/ipmi_agent.py
+@@ -92,7 +92,6 @@ class IPMIAgent(Agent):
+ 
+         # initialize sensors
+         for i, sensor_name in enumerate(self._sensor_repo.sensors):
+-
+             sensor = self._sensor_repo.sensors[sensor_name]
+             s_type = sensor.sensor_type
+ 
+@@ -215,7 +214,6 @@ class IPMIAgent(Agent):
+         self.stop_agent()
+ 
+     def __str__(self):
+-
+         agent_info = (
+             "\nipmi_sim lan: \n"
+             "   Accessible at: {host}:{port} \n"
+diff --git a/enginecore/enginecore/state/agent/snmp_agent.py b/enginecore/enginecore/state/agent/snmp_agent.py
+index 74c2ae7..0c112f3 100644
+--- a/enginecore/enginecore/state/agent/snmp_agent.py
++++ b/enginecore/enginecore/state/agent/snmp_agent.py
+@@ -103,7 +103,6 @@ class SNMPAgent(Agent):
+         return os.path.join(self._snmp_rec_dir, "snmpsimd.log")
+ 
+     def __str__(self):
+-
+         file_struct_info = (
+             "\n" "   Data directory: {0._snmp_rec_dir}\n" "   Log file: {0.log_path} \n"
+         ).format(self)
+diff --git a/enginecore/enginecore/state/agent/storcli_emu.py b/enginecore/enginecore/state/agent/storcli_emu.py
+index 2116ff0..bc29db3 100644
+--- a/enginecore/enginecore/state/agent/storcli_emu.py
++++ b/enginecore/enginecore/state/agent/storcli_emu.py
+@@ -72,7 +72,6 @@ class StorCLIEmulator:
+     ]
+ 
+     def __init__(self, asset_key, server_dir, socket_port):
+-
+         self._graph_ref = GraphReference()
+         self._server_key = asset_key
+         self._serversocket = None
+@@ -109,7 +108,7 @@ class StorCLIEmulator:
+         self._serversocket.close()
+ 
+     # *** Responses to cli commands ***
+-    def _strcli_header(self, ctrl_num=0, status="Success"):
++    def _strcli_header(self, ctrl_num=0, status="Success", description="None"):
+         """Reusable header for storcli output
+         (this appears at the top of most CLI outputs)"""
+ 
+@@ -118,10 +117,10 @@ class StorCLIEmulator:
+                 "cli_version": self._storcli_details["CLIVersion"],
+                 "op_sys": self._storcli_details["operatingSystem"],
+                 "status": status,
+-                "description": "None",
++                "description": description,
+                 "controller_line": "Controller = {}\n".format(ctrl_num)
+                 if ctrl_num
+-                else "",
++                else "Status Code = 0\n",
+             }
+ 
+             template = Template(templ_h.read())
+@@ -132,7 +131,6 @@ class StorCLIEmulator:
+ 
+         template_f_path = os.path.join(self._storcli_dir, "adapter_count")
+         with open(template_f_path) as templ_h, self._graph_ref.get_session() as session:
+-
+             options = {
+                 "header": self._strcli_header(),
+                 "ctrl_count": GraphReference.get_controller_count(
+@@ -146,7 +144,6 @@ class StorCLIEmulator:
+     def _strcli_ctrl_perf_mode(self, controller_num):
+         """Current performance mode (hardcoded)"""
+         with open(os.path.join(self._storcli_dir, "performance_mode")) as templ_h:
+-
+             options = {
+                 "header": self._strcli_header(controller_num),
+                 "mode_num": 0,
+@@ -163,7 +160,6 @@ class StorCLIEmulator:
+         with open(
+             alarm_state_f_path
+         ) as templ_h, self._graph_ref.get_session() as session:
+-
+             ctrl_info = GraphReference.get_controller_details(
+                 session, self._server_key, controller_num
+             )
+@@ -180,9 +176,8 @@ class StorCLIEmulator:
+         """Battery backup unit output for storcli"""
+ 
+         with open(os.path.join(self._storcli_dir, "bbu_data")) as templ_h:
+-
+             options = {
+-                "header": self._strcli_header(controller_num),
++                "header": self._strcli_header(controller_num, "Failure"),
+                 "ctrl_num": controller_num,
+                 "status": "Failed",
+                 "property": "-",
+@@ -199,7 +194,6 @@ class StorCLIEmulator:
+ 
+         rate_file = os.path.join(self._storcli_dir, rate_type)
+         with open(rate_file) as templ_h, self._graph_ref.get_session() as session:
+-
+             ctrl_info = GraphReference.get_controller_details(
+                 session, self._server_key, controller_num
+             )
+@@ -248,7 +242,6 @@ class StorCLIEmulator:
+         with open(ctrl_info_f) as info_h, open(
+             ctrl_entry_f
+         ) as entry_h, self._graph_ref.get_session() as session:
+-
+             ctrl_info = GraphReference.get_controller_details(
+                 session, self._server_key, controller_num
+             )
+@@ -288,8 +281,10 @@ class StorCLIEmulator:
+             entry_options = {
+                 "controller_num": controller_num,
+                 "drive_groups_num": ctrl_info["numDriveGroups"],
+-                "controller_date": "",
+-                "system_date": "",
++                "controller_date": time.strftime(
++                    "%m/%d/%Y, %H:%M:%S",
++                ),
++                "system_date": time.strftime("%m/%d/%Y, %H:%M:%S"),
+                 "status": "Optimal",
+             }
+ 
+@@ -316,7 +311,6 @@ class StorCLIEmulator:
+ 
+             # analyze and format virtual drive output
+             for i, v_drive in enumerate(drives["vd"]):
+-
+                 vd_state = copy.deepcopy(
+                     self._storcli_details["stateConfig"]["virtualDrive"]["Optl"]
+                 )
+@@ -424,7 +418,6 @@ class StorCLIEmulator:
+         with open(
+             os.path.join(self._storcli_dir, cv_f)
+         ) as templ_h, self._graph_ref.get_session() as session:
+-
+             cv_info = GraphReference.get_cachevault(
+                 session, self._server_key, controller_num
+             )
+@@ -444,7 +437,9 @@ class StorCLIEmulator:
+         pd_output = []
+ 
+         info_options = {
+-            "header": self._strcli_header(controller_num),
++            "header": self._strcli_header(
++                controller_num, "Success", "Show Drive Information Succeeded."
++            ),
+             "physical_drives": "",
+         }
+ 
+@@ -571,7 +566,6 @@ class StorCLIEmulator:
+         drives = []
+ 
+         with self._graph_ref.get_session() as session:
+-
+             vd_details = GraphReference.get_virtual_drive_details(
+                 session, self._server_key, controller_num
+             )
+@@ -619,7 +613,6 @@ class StorCLIEmulator:
+ 
+         vd_file = os.path.join(self._storcli_dir, "virtual_drive_data")
+         with open(vd_file) as templ_h:
+-
+             template = Template(templ_h.read())
+ 
+             # get virtual & physical drive details
+@@ -644,7 +637,6 @@ class StorCLIEmulator:
+ 
+         # Continue to accept connections until the ws server stops
+         while not self._stop_event.is_set():
+-
+             try:
+                 conn, _ = self._serversocket.accept()
+             except OSError:
+@@ -653,7 +645,6 @@ class StorCLIEmulator:
+ 
+             with conn:
+                 while not self._stop_event.is_set():
+-
+                     scout_r, _, _ = select.select([conn], [], [])
+                     if not scout_r:
+                         logger.debug("Socket is not ready for reading")
+diff --git a/enginecore/enginecore/state/api/server.py b/enginecore/enginecore/state/api/server.py
+index 5968084..44be3d0 100644
+--- a/enginecore/enginecore/state/api/server.py
++++ b/enginecore/enginecore/state/api/server.py
+@@ -55,7 +55,6 @@ class IServerStateManager(IStateManager):
+ 
+     @Randomizer.randomize_method()
+     def power_up(self):
+-
+         powered = self.status
+ 
+         if powered and not self._vm.isActive():
+diff --git a/enginecore/enginecore/state/api/state.py b/enginecore/enginecore/state/api/state.py
+index 597e5a7..cdd520c 100644
+--- a/enginecore/enginecore/state/api/state.py
++++ b/enginecore/enginecore/state/api/state.py
+@@ -369,7 +369,6 @@ class IStateManager:
+         """
+         graph_ref = GraphReference()
+         with graph_ref.get_session() as session:
+-
+             # cache assets
+             assets = GraphReference.get_assets_and_connections(session, flatten)
+             return cls._get_assets_states(assets, flatten)
+@@ -448,7 +447,6 @@ class IStateManager:
+ 
+         graph_ref = GraphReference()
+         with graph_ref.get_session() as session:
+-
+             play_path = GraphReference.get_play_path(session)
+         if not play_path:
+             return
+diff --git a/enginecore/enginecore/state/api/ups.py b/enginecore/enginecore/state/api/ups.py
+index 06a9f17..cf4282e 100644
+--- a/enginecore/enginecore/state/api/ups.py
++++ b/enginecore/enginecore/state/api/ups.py
+@@ -69,7 +69,7 @@ class IUPSStateManager(ISnmpDeviceStateManager):
+ 
+     def __init__(self, asset_info):
+         super().__init__(asset_info)
+-        self._max_battery_level = 1000  #%
++        self._max_battery_level = 1000  # %
+ 
+     def _update_battery_process_speed(self, process_channel, factor):
+         """Speed up/slow down battery related process"""
+@@ -195,7 +195,6 @@ class IUPSStateManager(ISnmpDeviceStateManager):
+ 
+     @Randomizer.randomize_method()
+     def power_up(self):
+-
+         powered = self.status
+ 
+         if self.battery_level and not self.status:
+diff --git a/enginecore/enginecore/state/engine/data_source.py b/enginecore/enginecore/state/engine/data_source.py
+index 451a962..bf0a6b7 100644
+--- a/enginecore/enginecore/state/engine/data_source.py
++++ b/enginecore/enginecore/state/engine/data_source.py
+@@ -19,7 +19,6 @@ class HardwareDataSource:
+ 
+ 
+ class HardwareGraphDataSource(HardwareDataSource):
+-
+     graph_ref = None
+ 
+     @classmethod
+diff --git a/enginecore/enginecore/state/engine/events.py b/enginecore/enginecore/state/engine/events.py
+index b033e7c..adef66c 100644
+--- a/enginecore/enginecore/state/engine/events.py
++++ b/enginecore/enginecore/state/engine/events.py
+@@ -354,7 +354,6 @@ class AssetPowerEvent(EngineEvent):
+     """
+ 
+     def __init__(self, *args, **kwargs):
+-
+         super().__init__(*args, **kwargs)
+         required_args = ["asset", "new_out_volt", "old_out_volt"]
+ 
+diff --git a/enginecore/enginecore/state/engine/iteration_consumer.py b/enginecore/enginecore/state/engine/iteration_consumer.py
+index a5c3bce..ee769e1 100644
+--- a/enginecore/enginecore/state/engine/iteration_consumer.py
++++ b/enginecore/enginecore/state/engine/iteration_consumer.py
+@@ -11,7 +11,6 @@ class EngineIterationConsumer:
+     that occurred due to power outage)"""
+ 
+     def __init__(self, iteration_worker_name="unspecified"):
+-
+         # queue of engine events waiting to be processed
+         self._event_queue = queue.Queue()
+         self._iteration_done_event = threading.Event()
+@@ -82,7 +81,6 @@ class EngineIterationConsumer:
+         start()"""
+ 
+         while True:
+-
+             self._iteration_done_event.wait()
+ 
+             # new processing iteration/loop was initialized
+diff --git a/enginecore/enginecore/state/hardware/internal_state.py b/enginecore/enginecore/state/hardware/internal_state.py
+index 55ee089..48dc6d9 100644
+--- a/enginecore/enginecore/state/hardware/internal_state.py
++++ b/enginecore/enginecore/state/hardware/internal_state.py
+@@ -373,13 +373,10 @@ class BMCServerStateManager(state_api.IBMCServerStateManager, ServerStateManager
+         StateManager.get_store().set(self.redis_key + ":cpu_load", str(int(value)))
+ 
+     def update_storage_temperature(self, old_ambient, new_ambient):
+-
+         with self._graph_ref.get_session() as db_s:
+-
+             hd_elements = GraphReference.get_all_hd_thermal_elements(db_s, self.key)
+ 
+             for hd_e in hd_elements:
+-
+                 if "DID" in hd_e["component"]:
+                     target_attr = "DID"
+                     target_value = hd_e["component"]["DID"]
+diff --git a/enginecore/enginecore/state/hardware/room.py b/enginecore/enginecore/state/hardware/room.py
+index 2d346d3..8e01921 100644
+--- a/enginecore/enginecore/state/hardware/room.py
++++ b/enginecore/enginecore/state/hardware/room.py
+@@ -109,7 +109,6 @@ class ServerRoom(Component):
+         amb_props = get_amb_props()
+ 
+         while not self._stop_event.is_set():
+-
+             self._stop_event.wait(amb_props["rate"])
+ 
+             # check if room environment matches the conditions
+@@ -144,7 +143,6 @@ class ServerRoom(Component):
+         volt_props = in_state.StateManager.get_voltage_props()
+ 
+         while not self._stop_event.is_set():
+-
+             self._stop_event.wait(volt_props["rate"])
+ 
+             if not volt_props["enabled"] or not in_state.StateManager.mains_status():
+@@ -210,7 +208,6 @@ class ServerRoom(Component):
+         )
+ 
+     def __str__(self):
+-
+         wall_power_status = in_state.StateManager.mains_status()
+         volt_props = in_state.StateManager.get_voltage_props()
+ 
+diff --git a/enginecore/enginecore/state/hardware/server_asset.py b/enginecore/enginecore/state/hardware/server_asset.py
+index 40a96fe..dd42a4c 100644
+--- a/enginecore/enginecore/state/hardware/server_asset.py
++++ b/enginecore/enginecore/state/hardware/server_asset.py
+@@ -166,7 +166,6 @@ class Server(StaticAsset):
+         # initialize load for PSUs
+         # and process alternative power sources (PSUs)
+         for key in self._psu_sm:
+-
+             psu_sm = self._psu_sm[key]
+             load_upd[key] = EventDataPair(0.0, 0.0)
+ 
+@@ -355,10 +354,8 @@ class ServerWithBMC(Server):
+         )
+ 
+         while not self._stop_event.is_set():
+-
+             # get a sample of CPU load if vm is up & running
+             if self.state.status and self.state.vm_is_active():
+-
+                 # more details on libvirt api:
+                 # https://stackoverflow.com/questions/40468370/what-does-cpu-time-represent-exactly-in-libvirt
+                 cpu_stats = self.state.get_cpu_stats()[0]
+diff --git a/enginecore/enginecore/state/hardware/static_asset.py b/enginecore/enginecore/state/hardware/static_asset.py
+index 6d8a033..7bd8866 100644
+--- a/enginecore/enginecore/state/hardware/static_asset.py
++++ b/enginecore/enginecore/state/hardware/static_asset.py
+@@ -12,7 +12,6 @@ from enginecore.state.hardware.asset_definition import register_asset
+ 
+ @register_asset
+ class StaticAsset(Asset):
+-
+     channel = "engine-static"
+     StateManagerCls = in_state.StaticDeviceStateManager
+ 
+diff --git a/enginecore/enginecore/state/hardware/ups_asset.py b/enginecore/enginecore/state/hardware/ups_asset.py
+index 6553edf..5161ded 100644
+--- a/enginecore/enginecore/state/hardware/ups_asset.py
++++ b/enginecore/enginecore/state/hardware/ups_asset.py
+@@ -145,7 +145,6 @@ class UPS(Asset, SNMPSim):
+             and self.state.on_battery
+             and not self._stop_event.is_set()
+         ):
+-
+             # calculate new battery level
+             battery_level = battery_level - (
+                 self._calc_battery_discharge() * self._drain_speed_factor
+diff --git a/enginecore/enginecore/state/net/ws_server.py b/enginecore/enginecore/state/net/ws_server.py
+index 47731bd..7ec98f6 100644
+--- a/enginecore/enginecore/state/net/ws_server.py
++++ b/enginecore/enginecore/state/net/ws_server.py
+@@ -137,7 +137,6 @@ class WebSocket(Component):
+         assets = IStateManager.get_system_status(flatten=False)
+         graph_ref = GraphReference()
+         with graph_ref.get_session() as session:
+-
+             stage_layout = GraphReference.get_stage_layout(session)
+ 
+             # send system topology and assets' power-interconnections
+diff --git a/enginecore/enginecore/state/sensor/repository.py b/enginecore/enginecore/state/sensor/repository.py
+index 49c0f02..9590406 100644
+--- a/enginecore/enginecore/state/sensor/repository.py
++++ b/enginecore/enginecore/state/sensor/repository.py
+@@ -50,7 +50,6 @@ class SensorRepository:
+                 self._sensors[s_name].set_to_defaults()
+ 
+     def __str__(self):
+-
+         repo_str = []
+         repo_str.append("Sensor Repository for Server {}".format(self._server_key))
+         repo_str.append(
+@@ -105,7 +104,6 @@ class SensorRepository:
+             sensor = self._sensors[s_name]
+             if sensor.group == SensorGroups.temperature:
+                 with self._sensor_file_locks.get_lock(sensor.name):
+-
+                     old_sensor_value = int(sensor.sensor_value)
+                     new_sensor_value = (
+                         old_sensor_value - old_ambient + new_ambient
+diff --git a/enginecore/enginecore/state/sensor/sensor.py b/enginecore/enginecore/state/sensor/sensor.py
+index 9c116ce..50e54b8 100644
+--- a/enginecore/enginecore/state/sensor/sensor.py
++++ b/enginecore/enginecore/state/sensor/sensor.py
+@@ -97,7 +97,6 @@ class Sensor:
+ 
+             # print any thermal connections
+             if thermal_rel["targets"]:
+-
+                 targets = thermal_rel["targets"]
+                 s_str.append(" - Thermal Impact:")
+ 
+@@ -158,7 +157,6 @@ class Sensor:
+         self._th_cpu_t.start()
+ 
+     def _launch_thermal_storage_thread(self, controller, hd_element, hd_type, event):
+-
+         thread_name = "{}-{}".format(hd_type.name, hd_element)
+         if (
+             thread_name in self._th_storage_t
+@@ -235,7 +233,6 @@ class Sensor:
+         from enginecore.state.api import IBMCServerStateManager
+ 
+         with self._graph_ref.get_session() as session:
+-
+             asset_info = GraphReference.get_asset_and_components(
+                 session, self._server_key
+             )
+@@ -256,7 +253,6 @@ class Sensor:
+                     return
+ 
+                 with self._s_file_locks.get_lock(self.name):
+-
+                     current_cpu_load = server_sm.cpu_load
+ 
+                     # calculate cpu impact based on the model
+@@ -289,7 +285,6 @@ class Sensor:
+     def _target_storage(self, controller, target, hd_type, event):
+         with self._graph_ref.get_session() as session:
+             while True:
+-
+                 self._s_thermal_event.wait()
+ 
+                 # target
+@@ -363,7 +358,6 @@ class Sensor:
+ 
+         with self._graph_ref.get_session() as session:
+             while True:
+-
+                 self._s_thermal_event.wait()
+ 
+                 rel_details = GraphReference.get_sensor_thermal_rel(
+@@ -392,7 +386,6 @@ class Sensor:
+ 
+                 # if model is specified -> use the runtime mappings
+                 if "model" in rel and rel["model"]:
+-
+                     calc_new_sv = arith_op
+                     arith_op = lambda sv, _: calc_new_sv(
+                         sv,
+@@ -413,7 +406,6 @@ class Sensor:
+                 with self._s_file_locks.get_lock(target), open(
+                     os.path.join(self._s_dir, target), "r+"
+                 ) as sf_handler:
+-
+                     current_value = int(sf_handler.read())
+ 
+                     change_by = (
+@@ -471,7 +463,6 @@ class Sensor:
+             raise ValueError("Thread already exists")
+ 
+         with self._graph_ref.get_session() as session:
+-
+             rel_details = GraphReference.get_sensor_thermal_rel(
+                 session,
+                 self._server_key,
+diff --git a/enginecore/enginecore/state/state_initializer.py b/enginecore/enginecore/state/state_initializer.py
+index 6407f11..63ed83f 100644
+--- a/enginecore/enginecore/state/state_initializer.py
++++ b/enginecore/enginecore/state/state_initializer.py
+@@ -121,7 +121,6 @@ def initialize(force_snmp_init=False):
+ 
+         # Set-up in the SNMPSim format
+         if "SNMPSim" in record["asset"].labels and record["oids"] and init_from_snmprec:
+-
+             # Read a file containing static .snmprec data
+             static_oid_file = record["asset"].get("staticOidFile")
+             static_oid_path = os.path.join(
+@@ -130,7 +129,6 @@ def initialize(force_snmp_init=False):
+ 
+             with open(static_oid_path, "r") as sfile_handler:
+                 for line in sfile_handler:
+-
+                     oid, dtype, value = line.replace("\n", "").split("|")
+                     if oid in graph_oids:
+                         dtype = graph_oids[oid]["dtype"]
+diff --git a/enginecore/enginecore/tools/recorder.py b/enginecore/enginecore/tools/recorder.py
+index b18b8b8..573af01 100644
+--- a/enginecore/enginecore/tools/recorder.py
++++ b/enginecore/enginecore/tools/recorder.py
+@@ -43,9 +43,7 @@ class Recorder:
+ 
+         @functools.wraps(work)
+         def record_wrapper(asset_self, *f_args, **f_kwargs):
+-
+             if asset_self.__module__.startswith(self._module) and self._enabled:
+-
+                 func_args = tuple((work, asset_self))
+ 
+                 partial_func = functools.partial(*func_args, *f_args, **f_kwargs)
+@@ -113,7 +111,6 @@ class Recorder:
+         json_pickle = lambda x: codecs.encode(pickle.dumps(x), "base64").decode()
+ 
+         for action in self._actions[slc]:
+-
+             action_info = {
+                 "args": json_pickle(action["work"].args[1:]),
+                 "kwargs": json_pickle(action["work"].keywords),
+@@ -194,7 +191,6 @@ class Recorder:
+         action_details = []
+ 
+         for action in self._actions[slc]:
+-
+             wrk_asset = action["work"].args[0]
+             if inspect.isclass(wrk_asset):
+                 obj_str = wrk_asset.__name__
+@@ -243,7 +239,6 @@ class Recorder:
+         self._replaying = True
+ 
+         for action, next_action in self.actions_iter(self._actions, slc):
+-
+             action_info = "Replaying: [ {action}{args} ]".format(
+                 action=action["work"].__name__, args=action["work"].args
+             )
+@@ -283,7 +278,6 @@ class Recorder:
+         """
+ 
+         for action, next_action in cls.actions_iter(actions, slc):
+-
+             print("{number}) [executing]: {work}".format(**action))
+             out_pad = len("{number}) ".format(**action)) * " "
+ 
+diff --git a/enginecore/features/environment.py b/enginecore/features/environment.py
+index 428ab09..bc2c27d 100644
+--- a/enginecore/features/environment.py
++++ b/enginecore/features/environment.py
+@@ -8,6 +8,7 @@ import os
+ 
+ from behave import fixture, use_fixture
+ 
++
+ # plyint: enable=no-name-in-module
+ def configure_logger(_):
+     """Configure logger for debugging purpose"""
+diff --git a/enginecore/features/steps/model.py b/enginecore/features/steps/model.py
+index 00a38b8..74d1fa3 100644
+--- a/enginecore/features/steps/model.py
++++ b/enginecore/features/steps/model.py
+@@ -39,7 +39,6 @@ def step_impl(context, key, min_volt, port):
+ 
+ @given('UPS asset with key "{key:d}" and "{port:d}" port is created')
+ def step_impl(context, key, port):
+-
+     sm.create_ups(
+         key,
+         {
+@@ -74,7 +73,6 @@ def _add_server_to_context(context, key):
+     'Server asset with key "{key:d}", "{psu_num:d}" PSU(s) and "{wattage:d}" Wattage is created'
+ )
+ def step_impl(context, key, psu_num, wattage):
+-
+     sm.create_server(
+         key,
+         {
+@@ -93,7 +91,6 @@ def step_impl(context, key, psu_num, wattage):
+ 
+ @given('ServerBMC asset with key "{key:d}" and "{wattage:d}" Wattage is created')
+ def step_impl(context, key, wattage):
+-
+     sm.create_server(
+         key,
+         {
+@@ -113,7 +110,6 @@ def step_impl(context, key, wattage):
+     'ServerBMC asset with key "{key:d}" and "{wattage:d}" Wattage and storcli64 support is created'
+ )
+ def step_impl(context, key, wattage):
+-
+     sm.create_server(
+         key,
+         {
+@@ -140,7 +136,6 @@ def step_impl(context, key, min_volt, wattage):
+ 
+ @given('asset "{source_key:d}" powers target "{dest_key:d}"')
+ def step_impl(context, source_key, dest_key):
+-
+     assert_that(source_key, is_in(context.hardware))
+     assert_that(dest_key, is_in(context.hardware))
+ 
+diff --git a/enginecore/features/steps/power.py b/enginecore/features/steps/power.py
+index cf3ff2b..0a75854 100644
+--- a/enginecore/features/steps/power.py
++++ b/enginecore/features/steps/power.py
+@@ -28,7 +28,6 @@ class TestCompletionTracker(Component):
+     th_done_queue = None
+ 
+     def __init__(self, timeout):
+-
+         super().__init__()
+         self._timeout = None if timeout < 0 else timeout
+ 
+@@ -62,7 +61,6 @@ class TestCompletionTracker(Component):
+ @then("Engine is up and running")
+ @given("Engine is up and running")
+ def step_impl(context):
+-
+     os.environ["SIMENGINE_WORKPLACE_TEMP"] = context.config.userdata["tmp_simengine"]
+ 
+     # Start up simengine (in a thread)
+@@ -88,7 +86,6 @@ def step_impl(_, delay):
+ 
+ @when("power outage happens")
+ def step_impl(context):
+-
+     if ISystemEnvironment.mains_status():
+         ISystemEnvironment.power_outage()
+         context.engine.handle_voltage_update(old_voltage=120, new_voltage=0)
+@@ -97,7 +94,6 @@ def step_impl(context):
+ 
+ @when("power is restored")
+ def step_impl(context):
+-
+     if not ISystemEnvironment.mains_status():
+         ISystemEnvironment.power_restore()
+         context.engine.handle_voltage_update(old_voltage=0, new_voltage=120)
+@@ -107,7 +103,6 @@ def step_impl(context):
+ @given('wallpower voltage is set to "{new_volt:d}"')
+ @when('wallpower voltage is updated to "{new_volt:d}"')
+ def step_impl(context, new_volt):
+-
+     old_volt = ISystemEnvironment.get_voltage()
+     ISystemEnvironment.set_voltage(new_volt)
+ 
+@@ -121,7 +116,6 @@ def step_impl(context, new_volt):
+ @given('asset "{key:d}" is "{state}"')
+ @when('asset "{key:d}" goes "{state}"')
+ def step_impl(context, key, state):
+-
+     state_m = context.hardware[key]
+ 
+     old_state = state_m.status
+diff --git a/enginecore/features/steps/snmp.py b/enginecore/features/steps/snmp.py
+index 638a71e..1e25c6a 100644
+--- a/enginecore/features/steps/snmp.py
++++ b/enginecore/features/steps/snmp.py
+@@ -74,7 +74,6 @@ def set_oid_value(oid, value, host="localhost", port=1024):
+ 
+ @when('asset "{key:d}" oid "{oid_num}" is set to "{oid_value}"')
+ def step_impl(context, key, oid_num, oid_value):
+-
+     snmp_asset_info = context.hardware[key].asset_info
+ 
+     set_oid_value(
+@@ -90,7 +89,6 @@ def step_impl(context, key, oid_num, oid_value):
+ 
+ @then('asset "{key:d}" oid "{oid_num}" is set to "{oid_value}"')
+ def step_impl(context, key, oid_num, oid_value):
+-
+     snmp_asset_info = context.hardware[key].asset_info
+ 
+     oid_response = query_snmp_interface(
+diff --git a/enginecore/features/steps/storage.py b/enginecore/features/steps/storage.py
+index 8e3fb54..010ff6c 100644
+--- a/enginecore/features/steps/storage.py
++++ b/enginecore/features/steps/storage.py
+@@ -22,7 +22,6 @@ def _recvall(storcli64_socket):
+ 
+ @then('response for asset "{key:d}" when running storcli64 command "{command}" is ok')
+ def step_impl(context, key, command):
+-
+     port = context.hardware[key].asset_info["storcliPort"]
+     storcli64_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     storcli64_socket.connect(("0.0.0.0", port))
+diff --git a/enginecore/features/steps/thermal.py b/enginecore/features/steps/thermal.py
+index 8eab02b..726ae5a 100644
+--- a/enginecore/features/steps/thermal.py
++++ b/enginecore/features/steps/thermal.py
+@@ -21,7 +21,6 @@ def step_impl(context):
+ @given('ambient is "{temp:d}" degrees')
+ @when('ambient is set to "{temp:d}" degrees')
+ def step_impl(context, temp):
+-
+     old_ambient = ISystemEnvironment.get_ambient()
+ 
+     if not math.isclose(temp, old_ambient):
+diff --git a/enginecore/features/steps/ups_battery.py b/enginecore/features/steps/ups_battery.py
+index ea34ec6..bdc5b8c 100644
+--- a/enginecore/features/steps/ups_battery.py
++++ b/enginecore/features/steps/ups_battery.py
+@@ -13,7 +13,6 @@ from snmp import query_snmp_interface
+ 
+ 
+ def _check_volt_threshold(context, key, threshold, old_volt, volt_change):
+-
+     # query snmp to grab oid and threshold oid value
+     th_oid = context.hardware[key].get_oid_by_name(threshold).oid
+     th_value = query_snmp_interface(th_oid)
+@@ -93,7 +92,6 @@ def step_impl(context, key, t_reason):
+ 
+ @then('after "{seconds:d}" seconds, transfer reason for UPS "{key:d}" is "{t_reason}"')
+ def step_impl(context, seconds, key, t_reason):
+-
+     time.sleep(seconds + 1)
+     context.execute_steps(
+         'then UPS "{key:d}" transfer reason is set to "{t_reason}"'.format(
+diff --git a/enginecore/script/demo/beat_pdu.py b/enginecore/script/demo/beat_pdu.py
+index a203048..842a881 100755
+--- a/enginecore/script/demo/beat_pdu.py
++++ b/enginecore/script/demo/beat_pdu.py
+@@ -157,7 +157,6 @@ def play_track_and_lights(track, hosts):
+ 
+ 
+ if __name__ == "__main__":
+-
+     argparser = argparse.ArgumentParser(
+         description="Play a music track with PDUs accompaniment"
+     )
+diff --git a/enginecore/script/query_snmp_preset.py b/enginecore/script/query_snmp_preset.py
+index 133dcbb..2aedf62 100755
+--- a/enginecore/script/query_snmp_preset.py
++++ b/enginecore/script/query_snmp_preset.py
+@@ -27,7 +27,6 @@ def query_snmp_interface(oid, host="localhost", port=1024):
+ 
+ 
+ if __name__ == "__main__":
+-
+     # parse cli option
+     argparser = argparse.ArgumentParser(description="Query all OIDs in a preset file")
+ 
+diff --git a/enginecore/storcli_template/alarm_state b/enginecore/storcli_template/alarm_state
+index 412893b..e0d2a76 100644
+--- a/enginecore/storcli_template/alarm_state
++++ b/enginecore/storcli_template/alarm_state
+@@ -1,3 +1,5 @@
++${header}
++
+ Controller Properties :
+ =====================
+ 
+@@ -8,4 +10,3 @@ Alarm     ${alarm_state}
+ ----------------
+ 
+ 
+-
+diff --git a/enginecore/storcli_template/bbu_data b/enginecore/storcli_template/bbu_data
+index a9cd271..bd77336 100644
+--- a/enginecore/storcli_template/bbu_data
++++ b/enginecore/storcli_template/bbu_data
+@@ -9,4 +9,3 @@ ${ctrl_num} ${status} ${property}        ${err_msg}   ${err_code}
+ --------------------------------------
+ 
+ 
+-
+diff --git a/enginecore/storcli_template/bgi_rate b/enginecore/storcli_template/bgi_rate
+index ef0be20..940ee76 100644
+--- a/enginecore/storcli_template/bgi_rate
++++ b/enginecore/storcli_template/bgi_rate
+@@ -1,4 +1,5 @@
+ ${header}
++
+ Controller Properties :
+ =====================
+ 
+@@ -9,4 +10,3 @@ BGI Rate  ${bgi_rate}%
+ ----------------
+ 
+ 
+-
+diff --git a/enginecore/storcli_template/cachevault_data b/enginecore/storcli_template/cachevault_data
+index a046fe7..d889203 100644
+--- a/enginecore/storcli_template/cachevault_data
++++ b/enginecore/storcli_template/cachevault_data
+@@ -1,4 +1,5 @@
+ ${header}
++
+ Cachevault_Info :
+ ===============
+ 
+@@ -77,4 +78,3 @@ Auto-Learn Mode      Transparent
+ --------------------------------------------------------------
+ 
+ 
+-
+diff --git a/enginecore/storcli_template/cc_rate b/enginecore/storcli_template/cc_rate
+index 6728d20..102bd84 100644
+--- a/enginecore/storcli_template/cc_rate
++++ b/enginecore/storcli_template/cc_rate
+@@ -1,4 +1,5 @@
+ ${header}
++
+ Controller Properties :
+ =====================
+ 
+@@ -9,4 +10,3 @@ CC Rate   ${cc_rate}%
+ ----------------
+ 
+ 
+-
+diff --git a/enginecore/storcli_template/controller_entry b/enginecore/storcli_template/controller_entry
+index dc9443a..4e18821 100644
+--- a/enginecore/storcli_template/controller_entry
++++ b/enginecore/storcli_template/controller_entry
+@@ -37,6 +37,7 @@ Device Interface = SAS-6G
+ Bus Number = 1
+ Device Number = 0
+ Function Number = 0
++Domain ID = 0
+ 
+ 
+ Pending Images in Flash :
+@@ -52,6 +53,7 @@ Memory Uncorrectable Errors = ${memory_uncorrectable_errors}
+ ECC Bucket Count = 0
+ Any Offline VD Cache Preserved = No
+ BBU Status = 0
++Support PD Firmware Download = Yes
+ PD Firmware Download in progress = No
+ Lock Key Assigned = No
+ Failed to get lock key on bootup = No
+@@ -62,6 +64,8 @@ A rollback operation is in progress = No
+ At least one PFK exists in NVRAM = Yes
+ SSC Policy is WB = No
+ Controller has booted into safe mode = No
++Controller shutdown required = No
++Controller has booted into certificate provision mode = No
+ 
+ 
+ Supported Adapter Operations :
+@@ -73,7 +77,7 @@ Reconstruct Rate = Yes
+ Patrol Read Rate = Yes
+ Alarm Control = Yes
+ Cluster Support = No
+-BBU  = Yes
++BBU = Yes
+ Spanning = Yes
+ Dedicated Hot Spare = Yes
+ Revertible Hot Spares = Yes
+@@ -120,7 +124,6 @@ Headless Mode = Yes
+ Dedicated HotSpares Limited = No
+ Point In Time Progress = Yes
+ Extended LD = Yes
+-Boot Volume Supported = No
+ Support Uneven span  = No
+ Support Config Auto Balance = No
+ Support Maintenance Mode = No
+@@ -142,6 +145,32 @@ Support Ctrl Info Extended = No
+ Support IButton less = No
+ Support AES Encryption Algorithm = No
+ Support Encrypted MFC = No
++Support Snapdump = No
++Support Force Personality Change = No
++Support Dual Fw Image = No
++Support PSOC Update = No
++Support Secure Boot = No
++Support Debug Queue = No
++Support Least Latency Mode = Yes
++Support OnDemand Snapdump = No
++Support Clear Snapdump = No
++Support PHY current speed = No
++Support Lane current speed = No
++Support NVMe Width = No
++Support Lane DeviceType = No
++Support Extended Drive performance Monitoring = No
++Support NVMe Repair = No
++Support Platform Security = No
++Support None Mode Params = No
++Support Extended Controller Property = No
++Support Smart Poll Interval for DirectAttached = No
++Support Write Journal Pinning = No
++Support SMP Passthru with Port Number = No
++Support SnapDump Preboot Trace Buffer Toggle = No
++Support Parity Read Cache Bypass = No
++Support NVMe Init Error Device ConnectorIndex = No
++Support VolatileKey = No
++Support PSOC Part Information = No
+ 
+ 
+ Supported PD Operations :
+@@ -163,6 +192,9 @@ Support Max Rate SATA = No
+ Support Degraded Media = No
+ Support Parallel FW Update = No
+ Support Drive Crypto Erase = No
++Support SSD Wear Gauge = No
++Support Sanitize = No
++Support Extended Sanitize = No
+ 
+ 
+ Supported VD Operations :
+@@ -223,6 +255,7 @@ On Board Expander = Absent
+ Temperature Sensor for ROC = Present
+ Temperature Sensor for Controller = Absent
+ Upgradable CPLD = Absent
++Upgradable PSOC = Absent
+ Current Size of CacheCade (GB) = 0
+ Current Size of FW Cache (MB) = 866
+ ROC temperature(Degree Celsius) = 90
+@@ -254,7 +287,7 @@ Auto Rebuild = On
+ Battery Warning = On
+ ECC Bucket Size = 15
+ ECC Bucket Leak Rate (hrs) = 24
+-Restore HotSpare on Insertion = On
++Restore Hot Spare on Insertion = On
+ Expose Enclosure Devices = Off
+ Maintain PD Fail History = On
+ Reorder Host Requests = On
+@@ -330,7 +363,6 @@ Time taken to detect CME = 60 sec
+ Capabilities :
+ ============
+ Supported Drives = SAS, SATA
+-Boot Volume Supported = NO
+ RAID Level Supported = RAID0, RAID1(2 or more drives), RAID5, RAID6, RAID00, RAID10(2 or more drives per span), RAID50, RAID60
+ Enable JBOD = No
+ Mix in Enclosure = Allowed
+@@ -349,8 +381,12 @@ Max Data Transfer Size = 8192 sectors
+ Max Strips PerIO = 42
+ Max Configurable CacheCade Size(GB) = 0
+ Max Transportable DGs = 0
++Enable Snapdump = No
++Enable SCSI Unmap = Yes
++Read cache bypass enabled for Parity RAID LDs = No
++FDE Drive Mix Support = No
+ Min Strip Size = 8 KB
+-Max Strip Size = 1.0 MB
++Max Strip Size = 1.000 MB
+ 
+ 
+ Scheduled Tasks :
+@@ -363,4 +399,8 @@ Battery learn Reoccurrence = 672 hrs
+ Next Battery Learn = 12/31/2018, 19:00:00
+ OEMID = FSC
+ 
++Security Protocol properties :
++============================
++Security Protocol = None
++
+ Drive Groups = ${drive_groups_num}
+\ No newline at end of file
+diff --git a/enginecore/storcli_template/controller_info b/enginecore/storcli_template/controller_info
+index e501196..ad10658 100644
+--- a/enginecore/storcli_template/controller_info
++++ b/enginecore/storcli_template/controller_info
+@@ -4,14 +4,12 @@ ${header}
+ 
+ ${controller_entry}
+ 
+-
+ TOPOLOGY :
+ ========
+ 
+ ${topology}
+-
+ DG=Disk Group Index|Arr=Array Index|Row=Row Index|EID=Enclosure Device ID
+-DID=Device ID|Type=Drive Type|Onln=Online|Rbld=Rebuild|Dgrd=Degraded
++DID=Device ID|Type=Drive Type|Onln=Online|Rbld=Rebuild|Optl=Optimal|Dgrd=Degraded
+ Pdgd=Partially degraded|Offln=Offline|BT=Background Task Active
+ PDC=PD Cache|PI=Protection Info|SED=Self Encrypting Drive|Frgn=Foreign
+ DS3=Dimmer Switch 3|dflt=Default|Msng=Missing|FSpace=Free Space Present
+@@ -23,10 +21,10 @@ VD LIST :
+ =======
+ 
+ ${virtual_drives}
+-
+-Cac=CacheCade|Rec=Recovery|OfLn=OffLine|Pdgd=Partially Degraded|Dgrd=Degraded
+-Optl=Optimal|RO=Read Only|RW=Read Write|HD=Hidden|TRANS=TransportReady|B=Blocked|
+-Consist=Consistent|R=Read Ahead Always|NR=No Read Ahead|WB=WriteBack|
++VD=Virtual Drive| DG=Drive Group|Rec=Recovery
++Cac=CacheCade|OfLn=OffLine|Pdgd=Partially Degraded|Dgrd=Degraded
++Optl=Optimal|dflt=Default|RO=Read Only|RW=Read Write|HD=Hidden|TRANS=TransportReady
++B=Blocked|Consist=Consistent|R=Read Ahead Always|NR=No Read Ahead|WB=WriteBack
+ AWB=Always WriteBack|WT=WriteThrough|C=Cached IO|D=Direct IO|sCC=Scheduled
+ Check Consistency
+ 
+@@ -36,14 +34,28 @@ PD LIST :
+ =======
+ 
+ ${physical_drives}
++EID=Enclosure Device ID|Slt=Slot No|DID=Device ID|DG=DriveGroup
++DHS=Dedicated Hot Spare|UGood=Unconfigured Good|GHS=Global Hotspare
++UBad=Unconfigured Bad|Sntze=Sanitize|Onln=Online|Offln=Offline|Intf=Interface
++Med=Media Type|SED=Self Encryptive Drive|PI=Protection Info
++SeSz=Sector Size|Sp=Spun|U=Up|D=Down|T=Transition|F=Foreign
++UGUnsp=UGood Unsupported|UGShld=UGood shielded|HSPShld=Hotspare shielded
++CFShld=Configured shielded|Cpybck=CopyBack|CBShld=Copyback Shielded
++UBUnsp=UBad Unsupported|Rbld=Rebuild
++
++Enclosures = 1
+ 
+-EID-Enclosure Device ID|Slt-Slot No.|DID-Device ID|DG-DriveGroup
+-DHS-Dedicated Hot Spare|UGood-Unconfigured Good|GHS-Global Hotspare
+-UBad-Unconfigured Bad|Onln-Online|Offln-Offline|Intf-Interface
+-Med-Media Type|SED-Self Encryptive Drive|PI-Protection Info
+-SeSz-Sector Size|Sp-Spun|U-Up|D-Down/PowerSave|T-Transition|F-Foreign
+-UGUnsp-Unsupported|UGShld-UnConfigured shielded|HSPShld-Hotspare shielded
+-CFShld-Configured shielded|Cpybck-CopyBack|CBShld-Copyback Shielded
++Enclosure LIST :
++==============
++
++--------------------------------------------------------------------
++EID State Slots PD PS Fans TSs Alms SIM Port# ProdID VendorSpecific 
++--------------------------------------------------------------------
++252 OK        8  8  0    0   0    0   1 -     SGPIO                 
++--------------------------------------------------------------------
++
++EID=Enclosure Device ID | PD=Physical drive count | PS=Power Supply count
++TSs=Temperature sensor count | Alms=Alarm count | SIM=SIM Count | ProdID=Product ID
+ 
+ 
+ Cachevault_Info :
+@@ -51,5 +63,3 @@ Cachevault_Info :
+ 
+ ${cachevault}
+ 
+-
+-
+diff --git a/enginecore/storcli_template/performance_mode b/enginecore/storcli_template/performance_mode
+index cd2cc69..1bb1231 100644
+--- a/enginecore/storcli_template/performance_mode
++++ b/enginecore/storcli_template/performance_mode
+@@ -1,4 +1,5 @@
+ ${header}
++
+ Controller Properties :
+ =====================
+ 
+@@ -9,4 +10,3 @@ Perf Mode ${mode_num} - ${mode_description}
+ -----------------------------------------
+ 
+ 
+-
+diff --git a/enginecore/storcli_template/physical_disk_data b/enginecore/storcli_template/physical_disk_data
+index 2c1da8d..c4085c4 100644
+--- a/enginecore/storcli_template/physical_disk_data
++++ b/enginecore/storcli_template/physical_disk_data
+@@ -1,7 +1,3 @@
+ ${header}
+-
+ ${physical_drives}
+ 
+-
+-
+-
+diff --git a/enginecore/storcli_template/physical_disk_entry b/enginecore/storcli_template/physical_disk_entry
+index c42d016..c9ba546 100644
+--- a/enginecore/storcli_template/physical_disk_entry
++++ b/enginecore/storcli_template/physical_disk_entry
+@@ -3,14 +3,14 @@ Drive ${drive_path} :
+ =================
+ 
+ ${drive_table}
+-
+-EID-Enclosure Device ID|Slt-Slot No.|DID-Device ID|DG-DriveGroup
+-DHS-Dedicated Hot Spare|UGood-Unconfigured Good|GHS-Global Hotspare
+-UBad-Unconfigured Bad|Onln-Online|Offln-Offline|Intf-Interface
+-Med-Media Type|SED-Self Encryptive Drive|PI-Protection Info
+-SeSz-Sector Size|Sp-Spun|U-Up|D-Down/PowerSave|T-Transition|F-Foreign
+-UGUnsp-Unsupported|UGShld-UnConfigured shielded|HSPShld-Hotspare shielded
+-CFShld-Configured shielded|Cpybck-CopyBack|CBShld-Copyback Shielded
++EID=Enclosure Device ID|Slt=Slot No|DID=Device ID|DG=DriveGroup
++DHS=Dedicated Hot Spare|UGood=Unconfigured Good|GHS=Global Hotspare
++UBad=Unconfigured Bad|Sntze=Sanitize|Onln=Online|Offln=Offline|Intf=Interface
++Med=Media Type|SED=Self Encryptive Drive|PI=Protection Info
++SeSz=Sector Size|Sp=Spun|U=Up|D=Down|T=Transition|F=Foreign
++UGUnsp=UGood Unsupported|UGShld=UGood shielded|HSPShld=Hotspare shielded
++CFShld=Configured shielded|Cpybck=CopyBack|CBShld=Copyback Shielded
++UBUnsp=UBad Unsupported|Rbld=Rebuild
+ 
+ 
+ Drive ${drive_path} - Detailed Information :
+@@ -57,15 +57,18 @@ Commissioned Spare = No
+ Emergency Spare = No
+ Last Predictive Failure Event Sequence Number = 0
+ Successful diagnostics completion on = N/A
++FDE Type = None
+ SED Capable = No
+ SED Enabled = No
+ Secured = No
+ Cryptographic Erase Capable = No
++Sanitize Support = Not supported
+ Locked = No
+ Needs EKM Attention = No
+ PI Eligible = No
+ Certified = No
+ Wide Port Capable = No
++Multipath = No
+ 
+ Port Information :
+ ================
+@@ -88,4 +91,3 @@ Inquiry Data =
+ 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+ 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+ 
+-
+diff --git a/enginecore/storcli_template/pr_rate b/enginecore/storcli_template/pr_rate
+index d671962..5b4eab2 100644
+--- a/enginecore/storcli_template/pr_rate
++++ b/enginecore/storcli_template/pr_rate
+@@ -1,4 +1,5 @@
+ ${header}
++
+ Controller Properties :
+ =====================
+ 
+@@ -7,3 +8,4 @@ Ctrl_Prop        Value
+ -----------------------
+ Patrol Read Rate ${pr_rate}%   
+ -----------------------
++
+diff --git a/enginecore/storcli_template/rebuild_rate b/enginecore/storcli_template/rebuild_rate
+index 6699d1a..ceb9769 100644
+--- a/enginecore/storcli_template/rebuild_rate
++++ b/enginecore/storcli_template/rebuild_rate
+@@ -1,4 +1,5 @@
+ ${header}
++
+ Controller Properties :
+ =====================
+ 
+@@ -9,4 +10,3 @@ Rebuildrate ${rebuild_rate}%
+ ------------------
+ 
+ 
+-
+diff --git a/enginecore/storcli_template/virtual_drive_data b/enginecore/storcli_template/virtual_drive_data
+index 78c8b44..e4ab7da 100644
+--- a/enginecore/storcli_template/virtual_drive_data
++++ b/enginecore/storcli_template/virtual_drive_data
+@@ -1,11 +1,12 @@
++
+ /c${controller}/v${virtual_drives_num} :
+ ======
+ 
+ ${virtual_drives}
+-
+-Cac=CacheCade|Rec=Recovery|OfLn=OffLine|Pdgd=Partially Degraded|Dgrd=Degraded
+-Optl=Optimal|RO=Read Only|RW=Read Write|HD=Hidden|TRANS=TransportReady|B=Blocked|
+-Consist=Consistent|R=Read Ahead Always|NR=No Read Ahead|WB=WriteBack|
++VD=Virtual Drive| DG=Drive Group|Rec=Recovery
++Cac=CacheCade|OfLn=OffLine|Pdgd=Partially Degraded|Dgrd=Degraded
++Optl=Optimal|dflt=Default|RO=Read Only|RW=Read Write|HD=Hidden|TRANS=TransportReady
++B=Blocked|Consist=Consistent|R=Read Ahead Always|NR=No Read Ahead|WB=WriteBack
+ AWB=Always WriteBack|WT=WriteThrough|C=Cached IO|D=Direct IO|sCC=Scheduled
+ Check Consistency
+ 
+@@ -14,14 +15,14 @@ PDs for VD ${virtual_drives_num} :
+ ============
+ 
+ ${physical_drives}
+-
+-EID-Enclosure Device ID|Slt-Slot No.|DID-Device ID|DG-DriveGroup
+-DHS-Dedicated Hot Spare|UGood-Unconfigured Good|GHS-Global Hotspare
+-UBad-Unconfigured Bad|Onln-Online|Offln-Offline|Intf-Interface
+-Med-Media Type|SED-Self Encryptive Drive|PI-Protection Info
+-SeSz-Sector Size|Sp-Spun|U-Up|D-Down/PowerSave|T-Transition|F-Foreign
+-UGUnsp-Unsupported|UGShld-UnConfigured shielded|HSPShld-Hotspare shielded
+-CFShld-Configured shielded|Cpybck-CopyBack|CBShld-Copyback Shielded
++EID=Enclosure Device ID|Slt=Slot No|DID=Device ID|DG=DriveGroup
++DHS=Dedicated Hot Spare|UGood=Unconfigured Good|GHS=Global Hotspare
++UBad=Unconfigured Bad|Sntze=Sanitize|Onln=Online|Offln=Offline|Intf=Interface
++Med=Media Type|SED=Self Encryptive Drive|PI=Protection Info
++SeSz=Sector Size|Sp=Spun|U=Up|D=Down|T=Transition|F=Foreign
++UGUnsp=UGood Unsupported|UGShld=UGood shielded|HSPShld=Hotspare shielded
++CFShld=Configured shielded|Cpybck=CopyBack|CBShld=Copyback Shielded
++UBUnsp=UBad Unsupported|Rbld=Rebuild
+ 
+ 
+ VD${virtual_drives_num} Properties :
+@@ -43,7 +44,6 @@ Creation Time = 04:00:22 AM
+ Emulation type = default
+ Is LD Ready for OS Requests = Yes
+ SCSI NAA Id = 60030057013c6550237fabd6107d475d
+-SCSI Unmap = No
+-
++Unmap Enabled = N/A
+ 
+ 
