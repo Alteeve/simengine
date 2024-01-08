@@ -1,6 +1,6 @@
 Name:      simengine-database
 Version:   3.42
-Release:   3%{?dist}
+Release:   2%{?dist}
 Summary:   SimEngine - Databases
 URL:       https://github.com/Seneca-CDOT/simengine
 License:   GPLv3+
@@ -8,14 +8,6 @@ License:   GPLv3+
 %global    gittag %{version}
 
 Source0:   https://github.com/Seneca-CDOT/simengine/archive/%{gittag}/simengine-%{version}.tar.gz
-
-Patch1:  0001-simengine-upstream.patch
-Patch2:  0002-simengine-upstream.patch
-Patch3:  0003-simengine-upstream.patch
-Patch4:  0004-simengine-upstream.patch
-Patch5:  0005-simengine-upstream.patch
-Patch6:  0006-simengine-upstream.patch
-Patch7:  0007-simengine-upstream-python39.patch
 
 BuildArch: noarch
 
@@ -32,7 +24,7 @@ Installs the SimEngine database configuration for Neo4j.
 systemctl stop neo4j
 
 %prep
-%autosetup -p 1 -c %{name}
+%autosetup -c %{name}
 
 %build
 
@@ -79,10 +71,6 @@ fi
 exit 0
 
 %changelog
-* Mon Jan  8 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-3
-- add all unreleased upstream changes
-- add support for python3.9
-
 * Mon Jan  8 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-2
 - Drop Requires: chkconfig
 
