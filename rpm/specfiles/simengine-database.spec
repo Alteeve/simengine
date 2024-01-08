@@ -1,6 +1,6 @@
 Name:      simengine-database
 Version:   3.42
-Release:   1%{?dist}
+Release:   2%{?dist}
 Summary:   SimEngine - Databases
 URL:       https://github.com/Seneca-CDOT/simengine
 License:   GPLv3+
@@ -15,7 +15,6 @@ Requires:  cypher-shell
 Requires:  redis
 Requires:  python3-neo4j-driver
 Requires:  python3-redis
-Requires:  chkconfig
 
 %description
 Installs the SimEngine database configuration for Neo4j.
@@ -71,6 +70,9 @@ fi
 exit 0
 
 %changelog
+* Mon Jan  8 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-2
+- Drop Requires: chkconfig
+
 * Fri Jan 20 2023 Chris Tyler <chris@tylers.info> - 3.42-1
 - new version
 
