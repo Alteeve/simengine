@@ -1,6 +1,6 @@
 Name:      simengine-database
 Version:   3.42
-Release:   2%{?dist}
+Release:   3%{?dist}
 Summary:   SimEngine - Databases
 URL:       https://github.com/Seneca-CDOT/simengine
 License:   GPLv3+
@@ -71,6 +71,9 @@ fi
 exit 0
 
 %changelog
+* Sat Mar  2 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-3
+- Align build version
+
 * Mon Jan  8 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-2
 - Drop Requires: chkconfig
 

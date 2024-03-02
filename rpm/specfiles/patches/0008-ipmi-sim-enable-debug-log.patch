@@ -1,0 +1,45 @@
+commit f5abe4e56bd7b35297929de6c3eed5b6313a6913
+Author: Fabio M. Di Nitto <fabbione@fabbione.net>
+Date:   Sat Mar 2 16:49:33 2024 +0100
+
+    ipmi: enable ipmi_sim debug log
+    
+    Signed-off-by: Fabio M. Di Nitto <fabbione@fabbione.net>
+
+diff --git a/enginecore/enginecore/state/agent/ipmi_agent.py b/enginecore/enginecore/state/agent/ipmi_agent.py
+index 8a86b6a..e488f85 100644
+--- a/enginecore/enginecore/state/agent/ipmi_agent.py
++++ b/enginecore/enginecore/state/agent/ipmi_agent.py
+@@ -194,6 +194,11 @@ class IPMIAgent(Agent):
+             sysconfig.get_config_var("LIBDIR"), "simengine", "haos_extend.so"
+         )
+ 
++    @property
++    def ipmi_sim_log_path(self):
++        """Path to stdout/stderr from IPMIsim"""
++        return os.path.join(self._ipmi_dir, "ipmi_sim.log")
++
+     def start_agent(self):
+         """Start up new ipmi_sim process"""
+ 
+@@ -201,13 +206,18 @@ class IPMIAgent(Agent):
+             ["ipmi_sim"]
+             + ["-c", self.lan_conf_path]
+             + ["-f", self.ipmisim_emu_path]
+-            + ["-s", self.emu_state_dir_path, "-n"]
++            + ["-s", self.emu_state_dir_path]
++            + ["-d"]
+         )
+ 
++        ipmilog = open(self.ipmi_sim_log_path, 'a')
++        ipmilog.write('ipmi_sim debug log\n')
++        ipmilog.flush()
++
+         logger.info("Starting agent: %s", " ".join(cmd))
+ 
+         self.register_process(
+-            subprocess.Popen(cmd, stderr=subprocess.DEVNULL, close_fds=True)
++            subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=ipmilog, stderr=subprocess.STDOUT)
+         )
+ 
+     def __exit__(self, exc_type, exc_value, traceback):

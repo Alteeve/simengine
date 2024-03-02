@@ -1,6 +1,6 @@
 Name:      simengine-core
 Version:   3.42
-Release:   2%{?dist}
+Release:   3%{?dist}
 Summary:   SimEngine - Core
 URL:       https://github.com/Seneca-CDOT/simengine
 License:   GPLv3+
@@ -17,6 +17,7 @@ Patch4:  0004-simengine-upstream.patch
 Patch5:  0005-simengine-upstream.patch
 Patch6:  0006-simengine-upstream.patch
 Patch7:  0007-simengine-upstream-python39.patch
+Patch8:  0008-ipmi-sim-enable-debug-log.patch
 
 BuildRequires: OpenIPMI-devel, gcc
 
@@ -83,6 +84,9 @@ systemctl enable %{name}.service --now
 systemctl daemon-reload
 
 %changelog
+* Sat Mar  2 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-3
+- add ipmi_sim debug logging
+
 * Mon Jan  8 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-2
 - add all unreleased upstream changes
 - add support for python3.9
