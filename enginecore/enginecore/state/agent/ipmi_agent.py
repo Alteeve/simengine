@@ -194,6 +194,11 @@ class IPMIAgent(Agent):
             sysconfig.get_config_var("LIBDIR"), "simengine", "haos_extend.so"
         )
 
+    @property
+    def ipmi_sim_log_path(self):
+        """Path to stdout/stderr from IPMIsim"""
+        return os.path.join(self._ipmi_dir, "ipmi_sim.log")
+
     def start_agent(self):
         """Start up new ipmi_sim process"""
 
@@ -201,13 +206,18 @@ class IPMIAgent(Agent):
             ["ipmi_sim"]
             + ["-c", self.lan_conf_path]
             + ["-f", self.ipmisim_emu_path]
-            + ["-s", self.emu_state_dir_path, "-n"]
+            + ["-s", self.emu_state_dir_path]
+            + ["-d"]
         )
+
+        ipmilog = open(self.ipmi_sim_log_path, 'a')
+        ipmilog.write('ipmi_sim debug log\n')
+        ipmilog.flush()
 
         logger.info("Starting agent: %s", " ".join(cmd))
 
         self.register_process(
-            subprocess.Popen(cmd, stderr=subprocess.DEVNULL, close_fds=True)
+            subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=ipmilog, stderr=subprocess.STDOUT)
         )
 
     def __exit__(self, exc_type, exc_value, traceback):
