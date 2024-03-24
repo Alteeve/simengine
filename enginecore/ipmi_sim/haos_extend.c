@@ -40,29 +40,6 @@
 static lmc_data_t *bmc_mc;
 static unsigned int server_id = 0;
 
-static struct board_info
-{
-  sys_data_t *sys;
-
-  lmc_data_t *mc;
-  unsigned char num;
-  char present;
-  char fru_good;
-  unsigned char fru[BOARD_FRU_SIZE];
-  struct timeval button_press_time;
-  unsigned int power_off_countdown;
-  char button_pressed;
-  char waiting_power_off;
-
-  volatile char fru_data_ready_for_handling;
-
-  /*
-     * Tracks the state of the power request line, request happens
-     * on a 1->0 transition.
-     */
-  char last_power_request;
-} boards[NUM_BOARDS];
-
 int ipmi_sim_module_print_version(sys_data_t *sys, char *options)
 {
   printf("IPMI Simulator module version %s\n", PVERSION);
@@ -88,7 +65,7 @@ bmc_get_chassis_control(lmc_data_t *mc, int op, unsigned char *val,
     // 2) `pipe` call fails
     // 3) unable to allocated memory
     // therefore, this is likely a severe error; stop the simulator
-    exit(1);
+    return 1;
   }
   else
   {
@@ -103,7 +80,7 @@ bmc_get_chassis_control(lmc_data_t *mc, int op, unsigned char *val,
     {
       sys->log(sys, OS_ERROR, NULL, "Failed to close file handle; CAUSE: %s", strerror(errno));
       // failing to clean up is most likely a severe error; stop the simulator
-      exit(1);
+      return 1;
     }
   }
 
@@ -116,7 +93,6 @@ bmc_set_chassis_control(lmc_data_t *mc, int op, unsigned char *val,
 {
   sys_data_t *sys = cb_data;
   char power_cmd[100] = {0};
-  unsigned int i;
 
   switch (op)
   {
