@@ -1,6 +1,6 @@
 Name:      simengine-core
 Version:   3.42
-Release:   4%{?dist}
+Release:   5%{?dist}
 Summary:   SimEngine - Core
 URL:       https://github.com/Seneca-CDOT/simengine
 License:   GPLv3+
@@ -19,6 +19,7 @@ Patch6:  0006-simengine-upstream.patch
 Patch7:  0007-simengine-upstream-python39.patch
 Patch8:  0008-ipmi-sim-enable-debug-log.patch
 Patch9:  0009-ipmi-sim-fix-memory-init.patch
+Patch10: 0010-ipmi-sim-fix-return-vs-exit.patch
 
 BuildRequires: OpenIPMI-devel, gcc
 
@@ -85,7 +86,10 @@ systemctl enable %{name}.service --now
 systemctl daemon-reload
 
 %changelog
-* Sat Mar 24 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-4
+* Sun Mar 24 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-5
+- fix ipmi_sim plugin exit vs return code
+
+* Sun Mar 24 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-4
 - add ipmi_sim plugin memory init
 
 * Sat Mar 02 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-3
