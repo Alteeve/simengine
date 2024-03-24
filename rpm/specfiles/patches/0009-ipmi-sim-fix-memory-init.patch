@@ -1,0 +1,21 @@
+commit cfc49a71ff3138a54f0cbb6c37d05d8c6f3c3072
+Author: Fabio M. Di Nitto <fabbione@fabbione.net>
+Date:   Sun Mar 24 06:02:06 2024 +0100
+
+    ipmi_sim: fix haos memory init
+    
+    Signed-off-by: Fabio M. Di Nitto <fabbione@fabbione.net>
+
+diff --git a/enginecore/ipmi_sim/haos_extend.c b/enginecore/ipmi_sim/haos_extend.c
+index 235bfa9..1312662 100644
+--- a/enginecore/ipmi_sim/haos_extend.c
++++ b/enginecore/ipmi_sim/haos_extend.c
+@@ -182,7 +182,7 @@ int ipmi_sim_module_init(sys_data_t *sys, const char *options)
+   free(initstr);
+ 
+ #ifdef OPENIPMI_POST_2_0_30
+-  rv = is_mc_alloc_unconfigured(sys, 0x20, &bmc_mc);
++  rv = sys->mc_alloc_unconfigured(sys, 0x20, &bmc_mc);
+ #else
+   rv = ipmi_mc_alloc_unconfigured(sys, 0x20, &bmc_mc);
+ #endif
