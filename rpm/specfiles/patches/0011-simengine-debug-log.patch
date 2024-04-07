@@ -1,0 +1,25 @@
+commit 2cd1e927b656c7fb33446ff2f2ac277f86878a75
+Author: Fabio M. Di Nitto <fabbione@fabbione.net>
+Date:   Sun Apr 7 06:37:53 2024 +0200
+
+    Enable simengine debug logging by default
+    
+    code mixes debug with verbose with some other stuff that
+    makes it difficult to get proper debug logs out of a
+    running server
+    
+    Signed-off-by: Fabio M. Di Nitto <fabbione@fabbione.net>
+
+diff --git a/enginecore/app.py b/enginecore/app.py
+index cdfc6f3..d62e267 100755
+--- a/enginecore/app.py
++++ b/enginecore/app.py
+@@ -26,7 +26,7 @@ def configure_logger(develop=False, debug=False):
+     """
+ 
+     logger = logging.getLogger(enginecore.__name__)
+-    logger.setLevel(logging.DEBUG if debug else logging.INFO)
++    logger.setLevel(logging.DEBUG)
+     formatter = logging.Formatter(DEV_FORMAT, "%H:%M:%S" if develop else FORMAT)
+ 
+     # neo4j logs to much info, disable DEBUG-level logging
