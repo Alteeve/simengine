@@ -1,6 +1,6 @@
 Name:      simengine-core
 Version:   3.42
-Release:   6%{?dist}
+Release:   7%{?dist}
 Summary:   SimEngine - Core
 URL:       https://github.com/Seneca-CDOT/simengine
 License:   GPLv3+
@@ -22,6 +22,7 @@ Patch9:  0009-ipmi-sim-fix-memory-init.patch
 Patch10: 0010-ipmi-sim-fix-return-vs-exit.patch
 Patch11: 0011-simengine-debug-log.patch
 Patch12: 0012-ipmi-sim-read-ip-from-conf.patch
+Patch13: 0013-apc-pdu-fix-status-mib.patch
 
 BuildRequires: OpenIPMI-devel, gcc
 
@@ -88,6 +89,9 @@ systemctl enable %{name}.service --now
 systemctl daemon-reload
 
 %changelog
+* Sun Apr 07 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-7
+- apc_pdu: add read status MIB
+
 * Sun Apr 07 2024 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-6
 - enable debug logging by default
 - ipmi_sim: use lan.conf to report ip address
