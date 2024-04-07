@@ -26,7 +26,7 @@ def configure_logger(develop=False, debug=False):
     """
 
     logger = logging.getLogger(enginecore.__name__)
-    logger.setLevel(logging.DEBUG if debug else logging.INFO)
+    logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(DEV_FORMAT, "%H:%M:%S" if develop else FORMAT)
 
     # neo4j logs to much info, disable DEBUG-level logging
