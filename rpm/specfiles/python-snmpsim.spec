@@ -3,7 +3,7 @@
 
 Name:           python-%{pypi_name}
 Version:        0.4.7
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        SNMP Agents simulator
 
 License:        BSD
@@ -12,6 +12,7 @@ Source0:        https://files.pythonhosted.org/packages/source/s/%{pypi_name}/%{
 Patch0:         0001-snmpsim-fix-cache-permissions.patch
 Patch1:         0002-snmpsim-fix-redis-returns.patch
 Patch2:         0003-snmpsim-fix-v1walk-crash.patch
+Patch3:         0004-snmpsim-fix-getnext-binary-search.patch
 
 BuildArch:      noarch
  
@@ -76,6 +77,9 @@ exit 0
 
 
 %changelog
+* Mon Jul 08 2024 Fabio M. Di Nitto <fdinitto@redhat.com> - 0.4.7-4
+- Fix SNMP GETNEXT binary search returning wrong OID when no exact match found
+
 * Fri Aug 20 2021 Tsu-ba-me <ynho.li.aa.e@gmail.com> - 0.4.7-3
 - Revise all patches and extend to build on CentOS 8 Stream.
 

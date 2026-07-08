@@ -1,0 +1,17 @@
+ variation/redis.py | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/variation/redis.py b/variation/redis.py
+index 21609c0..8fe4d10 100644
+--- a/variation/redis.py
++++ b/variation/redis.py
+@@ -221,6 +221,9 @@ def getNextOid(dbConn, keySpace, dbOid, index=False):
+             break
+     if not listsize:
+         raise error.SnmpsimError('empty/unsorted %s' % listKey)
++    # Fix: use minlen when no exact match found
++    if maxlen < minlen:
++        idx = minlen
+     return not index and lindex(dbConn, listKey, idx) or idx
+
+
