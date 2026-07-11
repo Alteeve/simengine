@@ -308,11 +308,8 @@ class PDUStateManager(state_api.IPDUStateManager, StateManager):
 class OutletStateManager(state_api.IOutletStateManager, StateManager):
     """Handles state logic for outlet asset"""
 
-    class OutletState(Enum):
-        """Outlet States (oid)"""
-
-        switchOff = 1
-        switchOn = 2
+    # Re-export OutletState from API for backward compatibility with signal handlers
+    OutletState = state_api.IOutletStateManager.OutletState
 
     def get_oid_value_by_name(self, oid_name):
         """Get value under object id name"""
@@ -327,25 +324,13 @@ class OutletStateManager(state_api.IOutletStateManager, StateManager):
         return 0
 
     def set_parent_oid_states(self, state):
-        """Bulk-set parent oid values
+        """Bulk-set parent oid values (used by signal event handlers)
 
         Args:
             state(OutletState): new parent(s) state
         """
-        with self._graph_ref.get_session() as session:
-            _, oids = GraphReference.get_parent_keys(session, self._asset_key)
-
-        oid_keys = oids.keys()
-        parents_new_states = {}
-        parent_values = StateManager.get_store().mget(oid_keys)
-
-        for rkey, rvalue in zip(oid_keys, parent_values):
-            #  datatype -> {} | {} <- value
-            parents_new_states[rkey] = "{}|{}".format(
-                rvalue.split(b"|")[0].decode(), oids[rkey][state.name]
-            )
-
-        StateManager.get_store().mset(parents_new_states)
+        # Delegate to the API method which handles SNMP synchronization
+        self._set_parent_oid_states(state)
 
     # TODO: move to interface
     def get_config_off_delay(self):
