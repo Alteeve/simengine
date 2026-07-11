@@ -1,0 +1,177 @@
+From 680b8e5f184e95e08f80c7e0a567ce2e7eaec10d Mon Sep 17 00:00:00 2001
+From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
+Date: Sat, 11 Jul 2026 07:41:36 +0200
+Subject: [PATCH] Fix simengine SNMP outlet state synchronization bug
+
+Problem: When powering PDU outlets via simengine-cli commands, simengine
+correctly updated internal outlet status but failed to update SNMP OID
+responses. SNMP queries would return stale state values even after power
+state changes.
+
+Root Cause: The CLI/WebSocket code path calls state manager methods
+directly (power_off/power_up), which never triggered the SNMP OID update
+logic. Only SNMP SET commands triggered OID synchronization via signal
+event handlers.
+
+Solution:
+1. Added power_off(), power_up(), and shut_down() methods to
+   IOutletStateManager (state/api/outlet.py) that synchronize SNMP OIDs
+   after power state changes via CLI commands.
+
+2. power_up() sets OIDs to switchOn BEFORE calling super().power_up()
+   to ensure _parents_available() check passes (it validates OID states).
+   If power up fails, OIDs are reverted to switchOff.
+
+3. power_off() and shut_down() set OIDs to switchOff AFTER successful
+   power state change.
+
+4. Moved OutletState enum to API layer and re-exported from internal_state
+   for backward compatibility with existing signal handlers.
+
+Files Changed:
+- enginecore/state/api/outlet.py: Added power control methods with SNMP
+  synchronization
+- enginecore/state/hardware/internal_state.py: Simplified to delegate to
+  API methods
+
+Verified: Full power cycle (up/down/up) correctly synchronizes both
+simengine internal state and SNMP OID values (tested with APC PDU).
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+---
+ enginecore/enginecore/state/api/outlet.py     | 68 +++++++++++++++++++
+ .../state/hardware/internal_state.py          | 25 ++-----
+ 2 files changed, 73 insertions(+), 20 deletions(-)
+
+diff --git a/enginecore/enginecore/state/api/outlet.py b/enginecore/enginecore/state/api/outlet.py
+index 386af75..debc328 100644
+--- a/enginecore/enginecore/state/api/outlet.py
++++ b/enginecore/enginecore/state/api/outlet.py
+@@ -1,5 +1,7 @@
+ """Access to outlet state"""
++from enum import Enum
+ from enginecore.state.api.snmp_state import ISnmpDeviceStateManager
++from enginecore.model.graph_reference import GraphReference
+ 
+ from enginecore.tools.randomizer import Randomizer
+ 
+@@ -7,3 +9,69 @@ from enginecore.tools.randomizer import Randomizer
+ @Randomizer.register
+ class IOutletStateManager(ISnmpDeviceStateManager):
+     """Exposes state logic for Outlet asset"""
++
++    class OutletState(Enum):
++        """Outlet States (oid) - values match APC PDU MIB spec"""
++
++        switchOn = 1
++        switchOff = 2
++
++    def _set_parent_oid_states(self, state):
++        """Bulk-set parent oid values to synchronize SNMP OIDs with outlet state
++
++        Args:
++            state(OutletState): new parent(s) state
++        """
++        graph_ref = GraphReference()
++        with graph_ref.get_session() as session:
++            _, oids = GraphReference.get_parent_keys(session, self.key)
++
++        oid_keys = oids.keys()
++        parents_new_states = {}
++        parent_values = self.get_store().mget(oid_keys)
++
++        for rkey, rvalue in zip(oid_keys, parent_values):
++            #  datatype -> {} | {} <- value
++            parents_new_states[rkey] = "{}|{}".format(
++                rvalue.split(b"|")[0].decode(), oids[rkey][state.name]
++            )
++
++        self.get_store().mset(parents_new_states)
++
++    def power_off(self):
++        """Power down this outlet and update SNMP OID states
++
++        Returns:
++            int: Asset's status after power-off operation
++        """
++        result = super().power_off()
++        # Synchronize SNMP OID states with internal outlet state
++        if result == 0:  # Successfully powered off
++            self._set_parent_oid_states(self.OutletState.switchOff)
++        return result
++
++    def power_up(self):
++        """Power up this outlet and update SNMP OID states
++
++        Returns:
++            int: Asset's status after power-on operation
++        """
++        # Set OIDs to switchOn BEFORE power up so _parents_available() check passes
++        self._set_parent_oid_states(self.OutletState.switchOn)
++        result = super().power_up()
++        # If power up failed, revert OIDs back to switchOff
++        if result == 0:
++            self._set_parent_oid_states(self.OutletState.switchOff)
++        return result
++
++    def shut_down(self):
++        """Gracefully shut down this outlet and update SNMP OID states
++
++        Returns:
++            int: Asset's status after shutdown operation
++        """
++        result = super().shut_down()
++        # Synchronize SNMP OID states with internal outlet state
++        if result == 0:  # Successfully shut down
++            self._set_parent_oid_states(self.OutletState.switchOff)
++        return result
+diff --git a/enginecore/enginecore/state/hardware/internal_state.py b/enginecore/enginecore/state/hardware/internal_state.py
+index 48dc6d9..8d8f7d3 100644
+--- a/enginecore/enginecore/state/hardware/internal_state.py
++++ b/enginecore/enginecore/state/hardware/internal_state.py
+@@ -308,11 +308,8 @@ class PDUStateManager(state_api.IPDUStateManager, StateManager):
+ class OutletStateManager(state_api.IOutletStateManager, StateManager):
+     """Handles state logic for outlet asset"""
+ 
+-    class OutletState(Enum):
+-        """Outlet States (oid)"""
+-
+-        switchOff = 1
+-        switchOn = 2
++    # Re-export OutletState from API for backward compatibility with signal handlers
++    OutletState = state_api.IOutletStateManager.OutletState
+ 
+     def get_oid_value_by_name(self, oid_name):
+         """Get value under object id name"""
+@@ -327,25 +324,13 @@ class OutletStateManager(state_api.IOutletStateManager, StateManager):
+         return 0
+ 
+     def set_parent_oid_states(self, state):
+-        """Bulk-set parent oid values
++        """Bulk-set parent oid values (used by signal event handlers)
+ 
+         Args:
+             state(OutletState): new parent(s) state
+         """
+-        with self._graph_ref.get_session() as session:
+-            _, oids = GraphReference.get_parent_keys(session, self._asset_key)
+-
+-        oid_keys = oids.keys()
+-        parents_new_states = {}
+-        parent_values = StateManager.get_store().mget(oid_keys)
+-
+-        for rkey, rvalue in zip(oid_keys, parent_values):
+-            #  datatype -> {} | {} <- value
+-            parents_new_states[rkey] = "{}|{}".format(
+-                rvalue.split(b"|")[0].decode(), oids[rkey][state.name]
+-            )
+-
+-        StateManager.get_store().mset(parents_new_states)
++        # Delegate to the API method which handles SNMP synchronization
++        self._set_parent_oid_states(state)
+ 
+     # TODO: move to interface
+     def get_config_off_delay(self):
+-- 
+2.54.0
+
