@@ -26,6 +26,10 @@ class IOutletStateManager(ISnmpDeviceStateManager):
         with graph_ref.get_session() as session:
             _, oids = GraphReference.get_parent_keys(session, self.key)
 
+        # Skip if no parent OIDs (wall-powered outlets don't have SNMP)
+        if not oids:
+            return
+
         oid_keys = oids.keys()
         parents_new_states = {}
         parent_values = self.get_store().mget(oid_keys)
