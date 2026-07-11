@@ -1,0 +1,56 @@
+From 64cdcc7b45c0cb4e4cad07a56d631b32e35326cd Mon Sep 17 00:00:00 2001
+From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
+Date: Sat, 11 Jul 2026 10:34:01 +0200
+Subject: [PATCH] Fix wall-powered outlet power-up failure
+
+Problem: Wall-powered outlets (keys 1 and 2 in anvil-tnf setup) could be
+powered down via CLI but failed to power back up. The power-up command
+would silently fail, leaving the outlet in off state even with wall
+voltage available.
+
+Root Cause: The `_set_parent_oid_states()` method in outlet.py was
+attempting to call `Redis.mset()` with an empty dictionary when the outlet
+had no parent OIDs. Wall-powered outlets don't have SNMP interfaces, so
+`GraphReference.get_parent_keys()` returns an empty OID dict. Redis
+rejects mset() with empty arguments, throwing "wrong number of arguments
+for 'mset' command", which prevented power_up() from completing.
+
+Solution: Added a check in `_set_parent_oid_states()` to return early if
+there are no parent OIDs. This allows wall-powered outlets to skip SNMP
+synchronization (which they don't need) and proceed with normal power-up
+logic.
+
+Impact: Wall-powered outlets can now be power-cycled via CLI commands.
+PDU/UPS-connected outlets with SNMP continue to work as before (commit
+680b8e5 already fixed their SNMP sync).
+
+Files Changed:
+- enginecore/state/api/outlet.py: Added empty OID check in
+  _set_parent_oid_states()
+
+Tested: Full power cycle of wall outlet (down/up/down/up) works correctly
+on anvil-ci-bm-phy01 test cluster.
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+---
+ enginecore/enginecore/state/api/outlet.py | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/enginecore/enginecore/state/api/outlet.py b/enginecore/enginecore/state/api/outlet.py
+index debc328..8ed7adb 100644
+--- a/enginecore/enginecore/state/api/outlet.py
++++ b/enginecore/enginecore/state/api/outlet.py
+@@ -26,6 +26,10 @@ class IOutletStateManager(ISnmpDeviceStateManager):
+         with graph_ref.get_session() as session:
+             _, oids = GraphReference.get_parent_keys(session, self.key)
+ 
++        # Skip if no parent OIDs (wall-powered outlets don't have SNMP)
++        if not oids:
++            return
++
+         oid_keys = oids.keys()
+         parents_new_states = {}
+         parent_values = self.get_store().mget(oid_keys)
+-- 
+2.54.0
+

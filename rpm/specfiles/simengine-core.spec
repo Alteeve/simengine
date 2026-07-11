@@ -1,6 +1,6 @@
 Name:      simengine-core
 Version:   3.42
-Release:   8%{?dist}
+Release:   9%{?dist}
 Summary:   SimEngine - Core
 URL:       https://github.com/Seneca-CDOT/simengine
 License:   GPLv3+
@@ -24,6 +24,7 @@ Patch11: 0011-simengine-debug-log.patch
 Patch12: 0012-ipmi-sim-read-ip-from-conf.patch
 Patch13: 0013-apc-pdu-fix-status-mib.patch
 Patch14: 0014-fix-outlet-snmp-sync.patch
+Patch15: 0015-fix-wall-outlet-power-up.patch
 
 BuildRequires: OpenIPMI-devel, gcc
 
@@ -90,6 +91,9 @@ systemctl enable %{name}.service --now
 systemctl daemon-reload
 
 %changelog
+* Fri Jul 11 2026 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-9
+- Fix wall-powered outlet power-up failure after power-down
+
 * Fri Jul 11 2026 Fabio M. Di Nitto <fabbione@fabbione.net> - 3.42-8
 - Fix SNMP outlet state synchronization with CLI power commands
 
